@@ -1,4 +1,4 @@
-QT += core gui widgets sql
+QT += core gui svgwidgets sql
 CONFIG += c++17
 
 SOURCES += \
@@ -9,7 +9,8 @@ SOURCES += \
     problemwindow.cpp \
     profilewindow.cpp \
     registerwindow.cpp \
-    resultwindow.cpp
+    resultwindow.cpp \
+    tool.cpp
 
 HEADERS += \
     cartawidget.h \
@@ -22,7 +23,8 @@ HEADERS += \
     problemwindow.h \
     profilewindow.h \
     registerwindow.h \
-    resultwindow.h
+    resultwindow.h \
+    tool.h
 
 FORMS += \
     LoginWindow.ui \
@@ -37,9 +39,17 @@ LIBS += -L$$PWD/lib -lnavlib
 
 DISTFILES += \
     resources/carta_nautica.jpg \
+    resources/icons/arco.png \
+    resources/icons/borrar.png \
+    resources/icons/color.png \
     resources/icons/compass_leg.svg \
+    resources/icons/linea.png \
+    resources/icons/mover.png \
+    resources/icons/punto.png \
     resources/icons/ruler.svg \
-    resources/icons/transportador.svg
+    resources/icons/texto.png \
+    resources/icons/transportador.svg \
+    resources/icons/zoom.png
 
 RESOURCES += \
     Resources.qrc

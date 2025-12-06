@@ -6,5 +6,17 @@
         <file>resources/icons/ruler.svg</file>
         <file>resources/icons/transportador.svg</file>
         <file>resources/icons/compass_leg.svg</file>
+        <file>resources/icons/arco.png</file>
+        <file>resources/icons/borrar.png</file>
+        <file>resources/icons/color.png</file>
+        <file>resources/icons/compas.png</file>
+        <file>resources/icons/limpiar.png</file>
+        <file>resources/icons/linea.png</file>
+        <file>resources/icons/mover.png</file>
+        <file>resources/icons/punto.png</file>
+        <file>resources/icons/regla.png</file>
+        <file>resources/icons/texto.png</file>
+        <file>resources/icons/transportador.png</file>
+        <file>resources/icons/zoom.png</file>
     </qresource>
 </RCC>

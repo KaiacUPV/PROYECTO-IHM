@@ -15,6 +15,51 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // =========================
+    //   ASIGNAR ICONOS PNG
+    // =========================
+
+    QSize iconSize(32, 32);
+
+    // --- Herramientas ---
+    ui->btnTexto->setIcon(QIcon(":/icon/resources/icons/texto.png"));
+    ui->btnTexto->setIconSize(iconSize);
+
+    ui->btnColor->setIcon(QIcon(":icon/resources/icons/color.png"));
+    ui->btnColor->setIconSize(iconSize);
+
+    ui->btnArco->setIcon(QIcon(":icon/resources/icons/arco.png"));
+    ui->btnArco->setIconSize(iconSize);
+
+    ui->btnLinea->setIcon(QIcon(":icon/resources/icons/linea.png"));
+    ui->btnLinea->setIconSize(iconSize);
+
+    ui->btnPunto->setIcon(QIcon(":icon/resources/icons/punto.png"));
+    ui->btnPunto->setIconSize(iconSize);
+
+    // --- Configuración ---
+    ui->btnLimpiar->setIcon(QIcon(":icon/resources/icons/limpiar.png"));
+    ui->btnLimpiar->setIconSize(iconSize);
+
+    ui->btnBorrar->setIcon(QIcon(":icon/resources/icons/borrar.png"));
+    ui->btnBorrar->setIconSize(iconSize);
+
+    ui->btnMover->setIcon(QIcon(":icon/resources/icons/mover.png"));
+    ui->btnMover->setIconSize(iconSize);
+
+    ui->btnZoom->setIcon(QIcon(":icon/resources/icons/zoom.png"));
+    ui->btnZoom->setIconSize(iconSize);
+
+    // --- Herramientas especiales ---
+    ui->btnRegla->setIcon(QIcon(":icon/resources/icons/regla.png"));
+    ui->btnRegla->setIconSize(iconSize);
+
+    ui->btnTransportador->setIcon(QIcon(":icon/resources/icons/transportador.png"));
+    ui->btnTransportador->setIconSize(iconSize);
+
+    ui->btnCompas->setIcon(QIcon(":icon/resources/icons/compas.png"));
+    ui->btnCompas->setIconSize(iconSize);
+
     // === Insertar el QGraphicsView dentro del mapwidget ===
     view = new QGraphicsView(ui->mapwidget);
     view->setScene(scene);
@@ -40,11 +85,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnLinea,   &QToolButton::clicked, this, &MainWindow::onLinea);
     connect(ui->btnArco,    &QToolButton::clicked, this, &MainWindow::onArco);
     connect(ui->btnColor,   &QToolButton::clicked, this, &MainWindow::onColor);
+
+
+    connect(ui->btnRegla, &QToolButton::clicked, this, &MainWindow::onRegla);
+    connect(ui->btnCompas, &QToolButton::clicked, this, &MainWindow::onCompas);
+    connect(ui->btnTransportador, &QToolButton::clicked, this, &MainWindow::onTransportador);
+
     connect(ui->btnMover,   &QToolButton::clicked, this, &MainWindow::onMover);
-    connect(ui->btnRegla,   &QToolButton::clicked, this, &MainWindow::onRegla);
     connect(ui->btnZoom,    &QToolButton::clicked, this, &MainWindow::onZoom);
     connect(ui->btnBorrar,  &QToolButton::clicked, this, &MainWindow::onBorrar);
     connect(ui->btnLimpiar, &QToolButton::clicked, this, &MainWindow::onLimpiar);
+
 
     setWindowTitle("Carta Náutica - IHM");
 }
@@ -65,7 +116,11 @@ void MainWindow::loadCarta()
     if (cartaPixmap.isNull())
         qDebug() << "ERROR cargando carta_náutica.jpg";
 
-    scene->addPixmap(cartaPixmap);
+    QGraphicsPixmapItem* item = scene->addPixmap(cartaPixmap);
+    item->setScale(0.2); // aumenta un 50%
+
+
+
 }
 
 // ==========================================================
@@ -116,13 +171,58 @@ void MainWindow::onColor()
                              "Color, grosor y tamaño de texto configurados.");
 }
 void MainWindow::onMover()  { currentTool = TOOL_MOVER; }
-void MainWindow::onRegla()  { currentTool = TOOL_REGLA; }
 void MainWindow::onZoom()   { zoomLevel += 0.1; view->scale(1.1,1.1); }
 void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; }
 void MainWindow::onLimpiar()
 {
     loadCarta();
 }
+void MainWindow::onRegla()
+{
+    if (!regla) {
+        regla = new Tool(":icon/resources/icons/ruler.svg");
+        regla->setToolSize(QSizeF(350, 60));
+        scene->addItem(regla);
+    }
+
+    centerToolOnView(regla);
+}
+void MainWindow::onCompas()
+{
+    if (!compas) {
+        compas = new Tool(":icon/resources/icons/compass_leg.svg");
+        compas->setToolSize(QSizeF(250, 250));
+        scene->addItem(compas);
+    }
+
+    centerToolOnView(compas);
+}
+
+void MainWindow::onTransportador()
+{
+    if (!transportador) {
+        transportador = new Tool(":icon/resources/icons/transportador.svg");
+        transportador->setToolSize(QSizeF(400, 250));
+        scene->addItem(transportador);
+    }
+
+    centerToolOnView(transportador);
+}
+
+void MainWindow::centerToolOnView(Tool *tool)
+{
+    if (!tool) return;
+
+    QRectF viewRect = view->mapToScene(view->viewport()->rect()).boundingRect();
+
+    QPointF centerPos(
+        viewRect.center().x() - tool->boundingRect().width()  / 2,
+        viewRect.center().y() - tool->boundingRect().height() / 2
+        );
+
+    tool->setPos(centerPos);
+}
+
 
 // ==========================================================
 //     ZOOM CON LA RUEDA DEL RATÓN

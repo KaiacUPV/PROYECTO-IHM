@@ -10,6 +10,12 @@
 #include <QGraphicsEllipseItem>
 #include <QMouseEvent>
 
+#include <QGraphicsSvgItem>
+#include <QSvgRenderer>
+
+#include "tool.h"
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -39,6 +45,8 @@ private slots:
     void onColor();
     void onMover();
     void onRegla();
+    void onTransportador();
+    void onCompas();
     void onZoom();
     void onBorrar();
     void onLimpiar();
@@ -75,6 +83,12 @@ private:
     // Zoom
     double zoomLevel = 1.0;
     void applyZoom(double factor);
+
+    Tool *regla = nullptr;
+    Tool *compas = nullptr;
+    Tool *transportador = nullptr;
+    void centerToolOnView(Tool *tool);
+
 
     // Cargar carta
     void loadCarta();
