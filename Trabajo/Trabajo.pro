@@ -6,7 +6,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     tool.cpp \
-    usuario.cpp
+    usuario.cpp \
+    utils.cpp
 
 HEADERS += \
     lib/include/navdaoexception.h \
@@ -16,7 +17,8 @@ HEADERS += \
     login.h \
     mainwindow.h \
     tool.h \
-    usuario.h
+    usuario.h \
+    utils.h
 
 FORMS += \
     login.ui \
