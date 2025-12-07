@@ -17,6 +17,7 @@
         <file>resources/icons/regla.png</file>
         <file>resources/icons/texto.png</file>
         <file>resources/icons/transportador.png</file>
-        <file>resources/icons/zoom.png</file>
+        <file>resources/icons/zoom_in.png</file>
+        <file>resources/icons/zoom_out.png</file>
     </qresource>
 </RCC>

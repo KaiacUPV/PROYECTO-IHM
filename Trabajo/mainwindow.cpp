@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QColorDialog>
@@ -47,8 +48,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnMover->setIcon(QIcon(":icon/resources/icons/mover.png"));
     ui->btnMover->setIconSize(iconSize);
 
-    ui->btnZoom->setIcon(QIcon(":icon/resources/icons/zoom.png"));
-    ui->btnZoom->setIconSize(iconSize);
+    ui->btnZoomIn->setIcon(QIcon(":icon/resources/icons/zoom_in.png"));
+    ui->btnZoomIn->setIconSize(iconSize);
+
+    ui->btnZoomOut->setIcon(QIcon(":icon/resources/icons/zoom_out.png"));
+    ui->btnZoomOut->setIconSize(iconSize);
 
     // --- Herramientas especiales ---
     ui->btnRegla->setIcon(QIcon(":icon/resources/icons/regla.png"));
@@ -92,7 +96,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnTransportador, &QToolButton::clicked, this, &MainWindow::onTransportador);
 
     connect(ui->btnMover,   &QToolButton::clicked, this, &MainWindow::onMover);
-    connect(ui->btnZoom,    &QToolButton::clicked, this, &MainWindow::onZoom);
+    connect(ui->btnZoomIn,    &QToolButton::clicked, this, &MainWindow::onZoomIn);
+    connect(ui->btnZoomOut,    &QToolButton::clicked, this, &MainWindow::onZoomOut);
     connect(ui->btnBorrar,  &QToolButton::clicked, this, &MainWindow::onBorrar);
     connect(ui->btnLimpiar, &QToolButton::clicked, this, &MainWindow::onLimpiar);
 
@@ -129,12 +134,17 @@ void MainWindow::loadCarta()
 
 void MainWindow::onPerfil()
 {
-    QMessageBox::information(this,"Perfil","Ventana perfil aún no implementada.");
+    usuario *login = new usuario(nullptr);
+    login->setWindowFlag(Qt::Window); // Hace que se comporte como ventana independiente
+    login->setAttribute(Qt::WA_DeleteOnClose);
+    login->show();
+
 }
 
 void MainWindow::onProblemas()
 {
-    QMessageBox::information(this,"Problemas","Ventana problemas aún no implementada.");
+    // Cambiar a la página 2 del stackedWidget
+    ui->stackedWidget->setCurrentWidget(ui->page_2);
 }
 
 // ==========================================================
@@ -171,7 +181,8 @@ void MainWindow::onColor()
                              "Color, grosor y tamaño de texto configurados.");
 }
 void MainWindow::onMover()  { currentTool = TOOL_MOVER; }
-void MainWindow::onZoom()   { zoomLevel += 0.1; view->scale(1.1,1.1); }
+void MainWindow::onZoomIn()   { zoomLevel += 0.1; view->scale(1.1,1.1); }
+void MainWindow::onZoomOut()   { zoomLevel -= 0.1; view->scale(0.9, 0.9); }
 void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; }
 void MainWindow::onLimpiar()
 {
@@ -264,158 +275,199 @@ void MainWindow::applyZoom(double factor)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    // ============================================================
+    //          MOVIMIENTO DEL MAPA CON CLICK DERECHO
+    // ============================================================
     if (obj == view->viewport())
     {
+        // --- Botón derecho presionado ---
         if (event->type() == QEvent::MouseButtonPress)
         {
-            auto *e = static_cast<QMouseEvent*>(event);
-            QPointF p = view->mapToScene(e->pos());
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
 
-            // ======================================================
-            //                  PUNTO
-            // ======================================================
-            if (currentTool == TOOL_PUNTO)
+            // CLICK DERECHO → MOVER MAPA
+            if (e->button() == Qt::RightButton)
             {
+                view->setDragMode(QGraphicsView::ScrollHandDrag);
 
-                    int r = activeWidth * 1.2;
-                    scene->addEllipse(p.x()-r, p.y()-r, 2*r, 2*r,
-                                  QPen(activeColor, activeWidth),
-                                  QBrush(activeColor));
+                // Simulamos un left click para activar el drag de QGraphicsView
+                QMouseEvent fakePress(
+                    QEvent::MouseButtonPress,
+                    e->pos(),
+                    Qt::LeftButton,
+                    Qt::LeftButton,
+                    e->modifiers()
+                    );
+                QApplication::sendEvent(obj, &fakePress);
 
                 return true;
             }
 
-            // ======================================================
-            //                  TEXTO
-            // ======================================================
-            if (currentTool == TOOL_TEXTO)
+            // CLICK IZQUIERDO → herramientas
+            if (e->button() == Qt::LeftButton)
             {
-                QString txt = QInputDialog::getText(this,"Texto","Introduce texto:");
-                if (!txt.isEmpty())
+                QPointF p = view->mapToScene(e->pos());
+
+                // ======================================================
+                //                        PUNTO
+                // ======================================================
+                if (currentTool == TOOL_PUNTO)
                 {
-                    QGraphicsTextItem *txt = scene->addText("Texto");
-                    txt->setDefaultTextColor(activeColor);
-
-                    QFont f = txt->font();
-                    f.setPointSize(activeFontSize);
-                    txt->setFont(f);
-
-                }
-                return true;
-            }
-
-            // ======================================================
-            //                  LÍNEA
-            // ======================================================
-            if (currentTool == TOOL_LINEA)
-            {
-                drawingLine = true;
-                lineStart = p;
-
-                tempLine = scene->addLine(QLineF(p,p),
-                                          QPen(activeColor, activeWidth));
-                return true;
-            }
-
-            // ======================================================
-            //                  ARCOS
-            // ======================================================
-            if (currentTool == TOOL_ARCO)
-            {
-                if (arcStep == 0) {
-                    arcA = p;
-                    arcStep = 1;
-                }
-                else if (arcStep == 1) {
-                    arcB = p;
-                    arcStep = 2;
-                }
-                else {
-                    // Tercer punto → define el radio
-                    QPointF arcC = p;
-
-                    double r = QLineF(arcA, arcC).length();
-                    if (r < 5) { arcStep = 0; return true; }
-
-                    // Cálculo de ángulos
-                    double startAngleDeg = QLineF(arcA, arcB).angle();   // ángulo inicial
-                    double endAngleDeg   = QLineF(arcA, arcC).angle();   // ángulo final
-                    double spanDeg = endAngleDeg - startAngleDeg;
-
-                    // Normalizar
-                    if (spanDeg < 0) spanDeg += 360;
-
-                    // Creamos un path con arco
-                    QRectF rect(arcA.x() - r, arcA.y() - r, 2*r, 2*r);
-                    QPainterPath path;
-
-                    path.arcMoveTo(rect, startAngleDeg);
-                    path.arcTo(rect, startAngleDeg, spanDeg);
-
-                    QGraphicsPathItem *arcItem = scene->addPath(path, QPen(activeColor, activeWidth));
-
-                    arcStep = 0;
+                    double r = activeWidth * 1.2;
+                    scene->addEllipse(p.x()-r, p.y()-r, 2*r, 2*r,
+                                      QPen(activeColor, activeWidth),
+                                      QBrush(activeColor));
                     return true;
                 }
 
-                return true;
-            }
+                // ======================================================
+                //                        TEXTO
+                // ======================================================
+                if (currentTool == TOOL_TEXTO)
+                {
+                    QString t = QInputDialog::getText(this,"Texto","Introduce texto:");
+                    if (!t.isEmpty())
+                    {
+                        QGraphicsTextItem *txtItem = scene->addText(t);
+                        txtItem->setDefaultTextColor(activeColor);
 
-            // ======================================================
-            //                  BORRAR
-            // ======================================================
-            if (currentTool == TOOL_BORRAR)
-            {
-                QGraphicsItem *item = scene->itemAt(p, QTransform());
-                if (item && item->type() != QGraphicsPixmapItem::Type)
-                    delete item;
-                return true;
-            }
+                        QFont f = txtItem->font();
+                        f.setPointSize(activeFontSize);
+                        txtItem->setFont(f);
+
+                        txtItem->setPos(p);
+
+                    }
+                    return true;
+                }
+
+                // ======================================================
+                //                        LÍNEA
+                // ======================================================
+                if (currentTool == TOOL_LINEA)
+                {
+                    drawingLine = true;
+                    lineStart = p;
+
+                    tempLine = scene->addLine(QLineF(p,p),
+                                              QPen(activeColor, activeWidth));
+
+                    return true;
+                }
+
+                // ======================================================
+                //                        ARCO
+                // ======================================================
+                if (currentTool == TOOL_ARCO)
+                {
+                    if (arcStep == 0) { arcA = p; arcStep = 1; }
+                    else if (arcStep == 1) { arcB = p; arcStep = 2; }
+                    else
+                    {
+                        QPointF arcC = p;
+                        double r = QLineF(arcA, arcC).length();
+
+                        if (r >= 5)
+                        {
+                            double startAngle = QLineF(arcA, arcB).angle();
+                            double endAngle   = QLineF(arcA, arcC).angle();
+                            double span = endAngle - startAngle;
+                            if (span < 0) span += 360;
+
+                            QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
+                            QPainterPath path;
+                            path.arcMoveTo(rect, startAngle);
+                            path.arcTo(rect, startAngle, span);
+
+                            scene->addPath(path, QPen(activeColor, activeWidth));
+                        }
+
+                        arcStep = 0;
+                    }
+                    return true;
+                }
+
+                // ======================================================
+                //                        BORRAR
+                // ======================================================
+                if (currentTool == TOOL_BORRAR)
+                {
+                    QGraphicsItem *it = scene->itemAt(p, QTransform());
+
+                    if (it && it->type() != QGraphicsPixmapItem::Type)
+                        delete it;
+
+                    return true;
+                }
+            } // fin herramientas click izquierdo
         }
 
-        // ======================================================
-        //                  ARRASTRAR LÍNEA
-        // ======================================================
+        // ============================================================
+        //                ARRASTRAR LÍNEA (mientras se dibuja)
+        // ============================================================
         if (event->type() == QEvent::MouseMove && drawingLine)
         {
-            auto *e = static_cast<QMouseEvent*>(event);
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
             QPointF p = view->mapToScene(e->pos());
+
             if (tempLine)
                 tempLine->setLine(QLineF(lineStart, p));
+
             return true;
         }
 
-        // ======================================================
-        //                  SUELTA LÍNEA
-        // ======================================================
+        // ============================================================
+        //                FINALIZAR LÍNEA
+        // ============================================================
         if (event->type() == QEvent::MouseButtonRelease && drawingLine)
         {
             drawingLine = false;
             tempLine = nullptr;
             return true;
         }
+
+        // --- Botón derecho soltado ---
+        if (event->type() == QEvent::MouseButtonRelease)
+        {
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
+
+            if (e->button() == Qt::RightButton)
+            {
+                // Simular release del botón izquierdo
+                QMouseEvent fakeRelease(
+                    QEvent::MouseButtonRelease,
+                    e->pos(),
+                    Qt::LeftButton,
+                    Qt::LeftButton,
+                    e->modifiers()
+                    );
+                QApplication::sendEvent(obj, &fakeRelease);
+
+                view->setDragMode(QGraphicsView::NoDrag);
+                return true;
+            }
+        }
     }
 
-    // =====================
-    //     ZOOM CTRL + RUEDA
-    // =====================
+    // ============================================================
+    //              ZOOM CONTROL + RUEDA
+    // ============================================================
     if (event->type() == QEvent::Wheel)
     {
-        auto *we = static_cast<QWheelEvent*>(event);
+        QWheelEvent *we = static_cast<QWheelEvent*>(event);
 
-        // Si CTRL NO está presionado → no es zoom
+        // Solo zoom con CTRL
         if (!(we->modifiers() & Qt::ControlModifier))
             return false;
 
-        // Delta positivo = rueda hacia arriba = acercar
         if (we->angleDelta().y() > 0)
             applyZoom(1.15);
         else
             applyZoom(1.0 / 1.15);
 
-        return true;   // Consumimos el evento
+        return true;
     }
-
 
     return QMainWindow::eventFilter(obj, event);
 }
+

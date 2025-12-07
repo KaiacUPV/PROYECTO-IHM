@@ -2,34 +2,26 @@ QT += core gui svgwidgets sql
 CONFIG += c++17
 
 SOURCES += \
-    cartawidget.cpp \
-    loginwindow.cpp \
+    login.cpp \
     main.cpp \
     mainwindow.cpp \
-    problemwindow.cpp \
-    profilewindow.cpp \
-    registerwindow.cpp \
-    resultwindow.cpp \
-    tool.cpp
+    tool.cpp \
+    usuario.cpp
 
 HEADERS += \
-    cartawidget.h \
     lib/include/navdaoexception.h \
     lib/include/navigation.h \
     lib/include/navigationdao.h \
     lib/include/navtypes.h \
-    loginwindow.h \
+    login.h \
     mainwindow.h \
-    problemwindow.h \
-    profilewindow.h \
-    registerwindow.h \
-    resultwindow.h \
-    tool.h
+    tool.h \
+    usuario.h
 
 FORMS += \
-    LoginWindow.ui \
-    RegisterWindow.ui \
-    mainwindow.ui
+    login.ui \
+    mainwindow.ui \
+    usuario.ui
 
 # Agregar esta línea (muy importante)
 INCLUDEPATH += $$PWD/lib/include

@@ -2,31 +2,34 @@
 #define LOGINWINDOW_H
 
 #include <QWidget>
-#include "navtypes.h"   // <-- NECESARIO para que User exista
+#include <QMessageBox>
+#include <QLineEdit>
+#include <QPushButton>
 
-class QLineEdit;
-class QPushButton;
+#include "ui_loginwindow.h"  // generado automáticamente por Qt a partir de loginwindow.ui
 
-class LoginWindow : public QWidget
+QT_BEGIN_NAMESPACE
+namespace Ui { class loginwindow; }
+QT_END_NAMESPACE
+
+class loginwindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit LoginWindow(QWidget *parent = nullptr);
-
-signals:
-    void userLoggedIn(User *u);   // <-- señal debe ir AQUÍ (no en private)
+    explicit loginwindow(QWidget *parent = nullptr);
+    ~loginwindow();
 
 private slots:
-    void onLogin();
-    void onRegister();
+    void onLoginClicked();  // ejemplo: slot para botón de login
 
 private:
-    QLineEdit *m_leNick;
-    QLineEdit *m_lePass;
+    Ui::loginwindow *ui;   // puntero a la UI generada por Qt
 
-    QPushButton *m_btnLogin;
-    QPushButton *m_btnRegister;
+    // Ejemplo: campos internos de login (opcional, porque ya están en el .ui)
+    QLineEdit *lineEdit_user;
+    QLineEdit *lineEdit_pass;
+    QPushButton *btn_login;
 };
 
 #endif // LOGINWINDOW_H

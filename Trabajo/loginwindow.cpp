@@ -1,66 +1,40 @@
 #include "loginwindow.h"
-#include "registerwindow.h"
-#include "mainwindow.h"
-#include "navigation.h"
 
-#include <QVBoxLayout>
-#include <QFormLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QMessageBox>
-
-LoginWindow::LoginWindow(QWidget *parent)
-    : QWidget(parent)
+loginwindow::loginwindow(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::loginwindow)
 {
-    setWindowTitle("Login - Pizarra de navegación");
+    ui->setupUi(this);  // inicializa la interfaz del .ui
 
-    m_leNick = new QLineEdit(this);
-    m_lePass = new QLineEdit(this);
-    m_lePass->setEchoMode(QLineEdit::Password);
+    // Opcional: asignar punteros a los widgets del .ui
+    lineEdit_user = ui->lineEdit_user;
+    lineEdit_pass = ui->lineEdit_pass;
+    btn_login = ui->btn_login;
 
-    m_btnLogin = new QPushButton("Entrar", this);
-    m_btnRegister = new QPushButton("Registrarse", this);
-
-    auto *form = new QFormLayout;
-    form->addRow("Nickname:", m_leNick);
-    form->addRow("Contraseña:", m_lePass);
-
-    auto *lay = new QVBoxLayout(this);
-    lay->addLayout(form);
-    lay->addWidget(m_btnLogin);
-    lay->addWidget(m_btnRegister);
-
-    connect(m_btnLogin, &QPushButton::clicked, this, &LoginWindow::onLogin);
-    connect(m_btnRegister, &QPushButton::clicked, this, &LoginWindow::onRegister);
-
-    resize(350, 180);
+    // Conectar el botón de login al slot
+    connect(btn_login, &QPushButton::clicked, this, &loginwindow::onLoginClicked);
 }
 
-void LoginWindow::onLogin()
+loginwindow::~loginwindow()
 {
-    QString nick = m_leNick->text().trimmed();
-    QString pass = m_lePass->text();
+    delete ui;  // libera la UI al cerrar la ventana
+}
 
-    try {
-        User *u = Navigation::instance().authenticate(nick, pass);
+// Ejemplo de slot para manejar login
+void loginwindow::onLoginClicked()
+{
+    QString user = lineEdit_user->text();
+    QString pass = lineEdit_pass->text();
 
-        if (!u) {
-            QMessageBox::warning(this, "Error", "Nickname o contraseña incorrectos.");
-            return;
-        }
-
-        emit userLoggedIn(u);  // <-- ya funciona
-        close();
-
-    } catch (const NavDAOException &ex) {
-        QMessageBox::critical(this, "DB Error", QString::fromStdString(ex.what()));
+    if(user.isEmpty() || pass.isEmpty())
+    {
+        QMessageBox::warning(this, "Login", "Por favor ingrese usuario y contraseña.");
+        return;
     }
-}
 
-void LoginWindow::onRegister()
-{
-    RegisterWindow *rw = new RegisterWindow();
-    rw->setAttribute(Qt::WA_DeleteOnClose);
-    rw->show();
-    close();
+    // Aquí podrías verificar credenciales con tu base de datos o lógica
+    QMessageBox::information(this, "Login", "Usuario: " + user + "\nContraseña: " + pass);
+
+    // Cerrar la ventana después de login exitoso (opcional)
+    // this->close();
 }

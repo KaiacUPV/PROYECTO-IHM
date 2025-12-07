@@ -9,11 +9,16 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsEllipseItem>
 #include <QMouseEvent>
+#include <QSplitter>
+
+
 
 #include <QGraphicsSvgItem>
 #include <QSvgRenderer>
 
 #include "tool.h"
+#include "usuario.h"
+
 
 
 QT_BEGIN_NAMESPACE
@@ -32,6 +37,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 
+
 private slots:
     // Panel usuario / problemas
     void onPerfil();
@@ -47,7 +53,8 @@ private slots:
     void onRegla();
     void onTransportador();
     void onCompas();
-    void onZoom();
+    void onZoomIn();
+    void onZoomOut();
     void onBorrar();
     void onLimpiar();
 
