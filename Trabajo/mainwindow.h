@@ -58,6 +58,8 @@ private slots:
     void onBorrar();
     void onLimpiar();
 
+    void back();
+
 private:
     Ui::MainWindow *ui;
 

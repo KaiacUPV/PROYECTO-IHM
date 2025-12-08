@@ -5,6 +5,7 @@ SOURCES += \
     login.cpp \
     main.cpp \
     mainwindow.cpp \
+    signup.cpp \
     tool.cpp \
     usuario.cpp \
     utils.cpp
@@ -16,6 +17,7 @@ HEADERS += \
     lib/include/navtypes.h \
     login.h \
     mainwindow.h \
+    signup.h \
     tool.h \
     usuario.h \
     utils.h
@@ -23,6 +25,7 @@ HEADERS += \
 FORMS += \
     login.ui \
     mainwindow.ui \
+    signup.ui \
     usuario.ui
 
 # Agregar esta línea (muy importante)

@@ -19,5 +19,7 @@
         <file>resources/icons/transportador.png</file>
         <file>resources/icons/zoom_in.png</file>
         <file>resources/icons/zoom_out.png</file>
+        <file>resources/icons/perfil.jpg</file>
+        <file>resources/icons/back.png</file>
     </qresource>
 </RCC>

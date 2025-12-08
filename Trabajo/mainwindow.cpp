@@ -64,6 +64,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnCompas->setIcon(QIcon(":icon/resources/icons/compas.png"));
     ui->btnCompas->setIconSize(iconSize);
 
+    // ----Boton de volver-----
+    ui->btnBack1->setIcon(QIcon(":icon/resources/icons/back.png"));
+    ui->btnBack1->setIconSize(iconSize);
+
+    ui->btnBack2->setIcon(QIcon(":icon/resources/icons/back.png"));
+    ui->btnBack1->setIconSize(iconSize);
+
+    //-----Perfil por defecto-----
+    QPixmap pixmap(":icon/resources/icons/perfil.jpg");   // Ruta del recurso o archivo
+    ui->lblUserAvatar->setPixmap(pixmap);
+    ui->lblUserAvatar->setScaledContents(true);
+
+
     // === Insertar el QGraphicsView dentro del mapwidget ===
     view = new QGraphicsView(ui->mapwidget);
     view->setScene(scene);
@@ -100,6 +113,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnZoomOut,    &QToolButton::clicked, this, &MainWindow::onZoomOut);
     connect(ui->btnBorrar,  &QToolButton::clicked, this, &MainWindow::onBorrar);
     connect(ui->btnLimpiar, &QToolButton::clicked, this, &MainWindow::onLimpiar);
+
+    //Boton de ir atrás
+    connect(ui->btnBack1, &QToolButton::clicked, this, &MainWindow::back);
+    connect(ui->btnBack2, &QToolButton::clicked, this, &MainWindow::back);
 
 
     setWindowTitle("Carta Náutica - IHM");
@@ -140,11 +157,14 @@ void MainWindow::onPerfil()
     login->show();
 
 }
-
+void MainWindow::back()
+{
+    ui->stackedWidget->setCurrentWidget(ui->page);
+}
 void MainWindow::onProblemas()
 {
     // Cambiar a la página 2 del stackedWidget
-    ui->stackedWidget->setCurrentWidget(ui->page_2);
+    ui->stackedWidget->setCurrentWidget(ui->page_problem);
 }
 
 // ==========================================================

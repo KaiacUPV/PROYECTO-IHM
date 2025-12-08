@@ -69,14 +69,14 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="page">
            <widget class="QGroupBox" name="groupTools&#10;">
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>180</y>
+              <y>200</y>
               <width>71</width>
               <height>441</height>
              </rect>
@@ -393,7 +393,7 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>120</y>
+              <y>140</y>
               <width>101</width>
               <height>52</height>
              </rect>
@@ -437,7 +437,7 @@
               <x>0</x>
               <y>0</y>
               <width>104</width>
-              <height>117</height>
+              <height>137</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -454,66 +454,85 @@
             <property name="title">
              <string/>
             </property>
-            <widget class="QLabel" name="lblUserAvatar">
-             <property name="geometry">
-              <rect>
-               <x>20</x>
-               <y>10</y>
-               <width>60</width>
-               <height>60</height>
-              </rect>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>60</height>
-              </size>
-             </property>
-             <property name="baseSize">
-              <size>
-               <width>60</width>
-               <height>60</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">    border: 2px solid black;
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QLabel" name="lblUserAvatar">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>80</width>
+                 <height>80</height>
+                </size>
+               </property>
+               <property name="baseSize">
+                <size>
+                 <width>60</width>
+                 <height>60</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">    border: 2px solid black;
     border-radius: 60px;</string>
-             </property>
-             <property name="text">
-              <string>Perfil</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-            <widget class="QPushButton" name="Boton_Usuario">
-             <property name="geometry">
-              <rect>
-               <x>12</x>
-               <y>81</y>
-               <width>80</width>
-               <height>24</height>
-              </rect>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Usuario</string>
-             </property>
-            </widget>
+               </property>
+               <property name="text">
+                <string>Perfil</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="Boton_Usuario">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Usuario</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </widget>
-          <widget class="QWidget" name="page_2"/>
+          <widget class="QWidget" name="page_usuario">
+           <widget class="QToolButton" name="btnBack1">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>31</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="page_problem">
+           <widget class="QToolButton" name="btnBack2">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>31</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </widget>
          </widget>
         </item>
        </layout>
