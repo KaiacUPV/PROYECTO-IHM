@@ -1,13 +1,23 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QColorDialog>
 #include <QInputDialog>
 #include <QtMath>
+#include <QApplication>
+#include <QDebug>
+#include <QDateTime>
+#include <QButtonGroup>
 
+#include <QRandomGenerator>
+#include <algorithm>
+#include <random>
+
+#include "usuario.h" // tu diálogo de login
+#include "login.h"
+#include "signup.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -69,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnBack1->setIconSize(iconSize);
 
     ui->btnBack2->setIcon(QIcon(":icon/resources/icons/back.png"));
-    ui->btnBack1->setIconSize(iconSize);
+    ui->btnBack2->setIconSize(iconSize);
 
     //-----Perfil por defecto-----
     QPixmap pixmap(":icon/resources/icons/perfil.jpg");   // Ruta del recurso o archivo
@@ -103,7 +113,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnArco,    &QToolButton::clicked, this, &MainWindow::onArco);
     connect(ui->btnColor,   &QToolButton::clicked, this, &MainWindow::onColor);
 
-
     connect(ui->btnRegla, &QToolButton::clicked, this, &MainWindow::onRegla);
     connect(ui->btnCompas, &QToolButton::clicked, this, &MainWindow::onCompas);
     connect(ui->btnTransportador, &QToolButton::clicked, this, &MainWindow::onTransportador);
@@ -118,6 +127,31 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnBack1, &QToolButton::clicked, this, &MainWindow::back);
     connect(ui->btnBack2, &QToolButton::clicked, this, &MainWindow::back);
 
+    //----Coneciones(usuario) ---
+    connect(ui->btnlogin, &QToolButton::clicked, this, &MainWindow::onlogin);
+
+    // --- Conexiones (problemas) ---
+    connect(ui->btnAleatorio, &QToolButton::clicked, this, &MainWindow::on_btnAleatorio_clicked);
+    connect(ui->btnCorregir,  &QToolButton::clicked, this, &MainWindow::on_btnCorregir_clicked);
+    connect(ui->comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::on_comboBox_currentIndexChanged);
+
+    // Agrupar radio buttons (opcional pero útil)
+    QButtonGroup *grp = new QButtonGroup(this);
+    grp->addButton(ui->radioBtnA, 0);
+    grp->addButton(ui->radioBtnB, 1);
+    grp->addButton(ui->radioBtnC, 2);
+    grp->addButton(ui->radioBtnD, 3);
+
+    // Inicializar lista de problemas (si Navigation ya tiene datos)
+    initializeProblems();
+
+    // Si hay problemas, cargar el primero por defecto
+    if (ui->comboBox->count() > 0)
+    {
+        ui->comboBox->setCurrentIndex(0);
+        loadProblem(0);
+    }
 
     setWindowTitle("Carta Náutica - IHM");
 }
@@ -126,6 +160,122 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+//=========Problemas===============
+void MainWindow::initializeProblems()
+{
+    auto &nav = Navigation::instance();
+    const auto &problems = nav.problems();
+
+    ui->comboBox->clear();
+    for (int i = 0; i < problems.size(); ++i)
+        ui->comboBox->addItem(QString::number(i+1));
+}
+
+void MainWindow::loadProblem(int index)
+{
+    auto &nav = Navigation::instance();
+    const auto &problems = nav.problems();
+
+    if (index < 0 || index >= problems.size())
+        return;
+
+    m_currentProblem = problems[index];
+
+    // Mostrar enunciado
+    ui->enunciado->setPlainText(m_currentProblem.text());
+
+    // Copiar las respuestas y barajarlas
+    m_currentAnswersRandom = m_currentProblem.answers();
+
+    // Protegemos en caso de problemas mal formados
+    if (m_currentAnswersRandom.size() < 4) {
+        QMessageBox::warning(this, "Problema", "El problema seleccionado no tiene 4 respuestas definidas.");
+        // limpiar textos
+        ui->radioBtnA->setText("A:");
+        ui->radioBtnB->setText("B:");
+        ui->radioBtnC->setText("C:");
+        ui->radioBtnD->setText("D:");
+        m_correctAnswerIndex = -1;
+        return;
+    }
+
+    // Barajar
+    std::shuffle(m_currentAnswersRandom.begin(), m_currentAnswersRandom.end(),
+                 std::mt19937{static_cast<unsigned int>(std::random_device{}())});
+
+    // Buscar cuál es la correcta después de mezclar
+    m_correctAnswerIndex = -1;
+    for (int i = 0; i < m_currentAnswersRandom.size(); ++i) {
+        if (m_currentAnswersRandom[i].validity()) {
+            m_correctAnswerIndex = i;
+            break;
+        }
+    }
+
+    // Mostrar respuestas en los botones (con prefijo para claridad)
+    ui->radioBtnA->setText(QStringLiteral("A: ") + m_currentAnswersRandom[0].text());
+    ui->radioBtnB->setText(QStringLiteral("B: ") + m_currentAnswersRandom[1].text());
+    ui->radioBtnC->setText(QStringLiteral("C: ") + m_currentAnswersRandom[2].text());
+    ui->radioBtnD->setText(QStringLiteral("D: ") + m_currentAnswersRandom[3].text());
+
+    // Desmarcar
+    ui->radioBtnA->setChecked(false);
+    ui->radioBtnB->setChecked(false);
+    ui->radioBtnC->setChecked(false);
+    ui->radioBtnD->setChecked(false);
+}
+
+void MainWindow::on_btnAleatorio_clicked()
+{
+    auto &nav = Navigation::instance();
+    int n = nav.problems().size();
+    if (n == 0) return;
+
+    int index = QRandomGenerator::global()->bounded(n);
+    ui->comboBox->setCurrentIndex(index);
+    loadProblem(index);
+}
+
+void MainWindow::on_comboBox_currentIndexChanged(int index)
+{
+    loadProblem(index);
+}
+
+void MainWindow::on_btnCorregir_clicked()
+{
+    int selected = -1;
+
+    if (ui->radioBtnA->isChecked()) selected = 0;
+    if (ui->radioBtnB->isChecked()) selected = 1;
+    if (ui->radioBtnC->isChecked()) selected = 2;
+    if (ui->radioBtnD->isChecked()) selected = 3;
+
+    if (selected == -1)
+    {
+        QMessageBox::warning(this, "Aviso", "Debes seleccionar una respuesta.");
+        return;
+    }
+
+    if (m_correctAnswerIndex == -1)
+    {
+        QMessageBox::warning(this, "Aviso", "Este problema no tiene respuesta correcta definida.");
+        return;
+    }
+
+    // --- Comprobar ---
+    if (selected == m_correctAnswerIndex)
+    {
+        QMessageBox::information(this, "Correcto", "¡Respuesta correcta!");
+        m_sessionHits++;
+    }
+    else
+    {
+        QMessageBox::critical(this, "Incorrecto", "La respuesta no es correcta.");
+        m_sessionFaults++;
+    }
+}
+
 
 // ==========================================================
 //     CARGAR CARTA
@@ -140,9 +290,6 @@ void MainWindow::loadCarta()
 
     QGraphicsPixmapItem* item = scene->addPixmap(cartaPixmap);
     item->setScale(0.2); // aumenta un 50%
-
-
-
 }
 
 // ==========================================================
@@ -151,20 +298,73 @@ void MainWindow::loadCarta()
 
 void MainWindow::onPerfil()
 {
-    usuario *login = new usuario(nullptr);
-    login->setWindowFlag(Qt::Window); // Hace que se comporte como ventana independiente
-    login->setAttribute(Qt::WA_DeleteOnClose);
-    login->show();
+    ui->stackedWidget->setCurrentWidget(ui->page_usuario);
 
+    // Expandir el splitter hacia la derecha
+    QList<int> sizes;
+    sizes << 150 << 400;  // izquierda, derecha (ajusta a tu gusto)
+    ui->splitter->setSizes(sizes);
 }
+void MainWindow::onlogin()
+{
+    login *dlg = new login();
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+
+    connect(dlg, &login::loginSuccess,
+            this, [this](const User &u)
+            {
+                // Guardar en MainWindow el usuario y el nick actual
+                this->m_loggedUser = u;            // declara User m_loggedUser; en MainWindow.h
+                this->currentNickName = u.nickName();
+                // marca que hay alguien logeado si lo necesitas
+                this->m_isLogged = true;
+
+                QMessageBox::information(this, "Bienvenido",
+                                         "Bienvenido " + u.nickName());
+
+                ui->stackedWidget->setCurrentWidget(ui->page);
+
+                QList<int> sizes;
+                sizes << 150 << 900;
+                ui->splitter->setSizes(sizes);
+            });
+
+
+    connect(dlg, &login::openSignup, this, [this]()
+            {
+                signup *reg = new signup();
+                reg->setAttribute(Qt::WA_DeleteOnClose);
+
+                connect(reg, &signup::signupSuccess, this, [this]()
+                        {
+                            QMessageBox::information(this, "Registro", "Cuenta creada. Ahora inicia sesión.");
+                        });
+
+                reg->show();
+            });
+
+    dlg->show();
+}
+
 void MainWindow::back()
 {
     ui->stackedWidget->setCurrentWidget(ui->page);
+
+    // Expandir el splitter hacia la derecha
+    QList<int> sizes;
+    sizes << 150 << 100;  // izquierda, derecha (ajusta a tu gusto)
+    ui->splitter->setSizes(sizes);
 }
+
 void MainWindow::onProblemas()
 {
     // Cambiar a la página 2 del stackedWidget
     ui->stackedWidget->setCurrentWidget(ui->page_problem);
+
+    // Expandir el splitter hacia la derecha
+    QList<int> sizes;
+    sizes << 150 << 400;  // izquierda, derecha (ajusta a tu gusto)
+    ui->splitter->setSizes(sizes);
 }
 
 // ==========================================================
@@ -177,7 +377,7 @@ void MainWindow::onLinea()  { currentTool = TOOL_LINEA; }
 void MainWindow::onArco()   { currentTool = TOOL_ARCO; arcStep = 0; }
 void MainWindow::onColor()
 {
-     // Elegir color
+    // Elegir color
     activeColor = QColorDialog::getColor(Qt::red, this);
     currentTool = TOOL_COLOR;
 
@@ -254,7 +454,6 @@ void MainWindow::centerToolOnView(Tool *tool)
     tool->setPos(centerPos);
 }
 
-
 // ==========================================================
 //     ZOOM CON LA RUEDA DEL RATÓN
 // ==========================================================
@@ -287,7 +486,6 @@ void MainWindow::applyZoom(double factor)
     view->scale(factor, factor);
     zoomLevel = newZoom;
 }
-
 
 // ==========================================================
 //     EVENTOS DE RATÓN
@@ -490,4 +688,3 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
     return QMainWindow::eventFilter(obj, event);
 }
-

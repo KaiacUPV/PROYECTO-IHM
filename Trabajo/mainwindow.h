@@ -11,15 +11,11 @@
 #include <QMouseEvent>
 #include <QSplitter>
 
-
-
 #include <QGraphicsSvgItem>
 #include <QSvgRenderer>
 
 #include "tool.h"
-#include "usuario.h"
-
-
+#include "navigation.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,7 +32,6 @@ public:
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-
 
 private slots:
     // Panel usuario / problemas
@@ -59,10 +54,15 @@ private slots:
     void onLimpiar();
 
     void back();
+    void onlogin();
+
+    // Problemas: slots conectados desde constructor
+    void on_btnAleatorio_clicked();
+    void on_comboBox_currentIndexChanged(int index);
+    void on_btnCorregir_clicked();
 
 private:
     Ui::MainWindow *ui;
-
 
     // Mapa
     QGraphicsScene *scene;
@@ -88,7 +88,6 @@ private:
     int activeWidth = 3;
     int activeFontSize = 16;
 
-
     // Zoom
     double zoomLevel = 1.0;
     void applyZoom(double factor);
@@ -98,6 +97,22 @@ private:
     Tool *transportador = nullptr;
     void centerToolOnView(Tool *tool);
 
+    // Problemas
+    Problem m_currentProblem;
+    QVector<Answer> m_currentAnswersRandom;
+    int m_correctAnswerIndex = -1;
+    QString currentNickName;
+
+    int m_sessionHits = 0;
+    int m_sessionFaults = 0;
+
+    //Sesiones
+    User m_loggedUser;
+    bool m_isLogged = false;
+
+
+    void initializeProblems();
+    void loadProblem(int index);
 
     // Cargar carta
     void loadCarta();

@@ -35,6 +35,7 @@ INCLUDEPATH += $$PWD/Headers
 LIBS += -L$$PWD/lib -lnavlib
 
 DISTFILES += \
+    navdb.sqlite \
     resources/carta_nautica.jpg \
     resources/icons/arco.png \
     resources/icons/borrar.png \

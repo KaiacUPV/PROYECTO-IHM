@@ -2,6 +2,7 @@
 #define LOGIN_H
 
 #include <QWidget>
+#include "navigation.h"
 
 namespace Ui {
 class login;
@@ -14,6 +15,15 @@ class login : public QWidget
 public:
     explicit login(QWidget *parent = nullptr);
     ~login();
+
+signals:
+    void loginSuccess(const User &user);
+    void openSignup();
+
+private slots:
+    void onAccept();
+    void onCancel();
+    void onSignup();
 
 private:
     Ui::login *ui;

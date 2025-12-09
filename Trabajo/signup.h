@@ -2,6 +2,7 @@
 #define SIGNUP_H
 
 #include <QWidget>
+#include "navigation.h"
 
 namespace Ui {
 class signup;
@@ -14,6 +15,13 @@ class signup : public QWidget
 public:
     explicit signup(QWidget *parent = nullptr);
     ~signup();
+
+signals:
+    void signupSuccess();
+
+private slots:
+    void onAccept();
+    void onCancel();
 
 private:
     Ui::signup *ui;

@@ -10,6 +10,12 @@
     <height>1000</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>1000</width>
@@ -31,7 +37,7 @@
       </property>
       <widget class="QWidget" name="mapwidget" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
          <horstretch>50</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -57,7 +63,7 @@
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -69,7 +75,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="page">
            <widget class="QGroupBox" name="groupTools&#10;">
@@ -517,6 +523,90 @@
              <string/>
             </property>
            </widget>
+           <widget class="QPushButton" name="btnlogin">
+            <property name="geometry">
+             <rect>
+              <x>70</x>
+              <y>210</y>
+              <width>80</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Login</string>
+            </property>
+           </widget>
+           <widget class="QGroupBox" name="groupUsuario_2">
+            <property name="geometry">
+             <rect>
+              <x>60</x>
+              <y>30</y>
+              <width>104</width>
+              <height>137</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="title">
+             <string/>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QLabel" name="lblUserAvatar_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>80</width>
+                 <height>80</height>
+                </size>
+               </property>
+               <property name="baseSize">
+                <size>
+                 <width>60</width>
+                 <height>60</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">    border: 2px solid black;
+    border-radius: 60px;</string>
+               </property>
+               <property name="text">
+                <string>Perfil</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="Btn_Editar">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Editar Perfil</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
           <widget class="QWidget" name="page_problem">
            <widget class="QToolButton" name="btnBack2">
@@ -530,6 +620,139 @@
             </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+           <widget class="QToolButton" name="btnAleatorio">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>470</y>
+              <width>71</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Aleatorio</string>
+            </property>
+           </widget>
+           <widget class="QToolButton" name="btnCorregir">
+            <property name="geometry">
+             <rect>
+              <x>140</x>
+              <y>470</y>
+              <width>71</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Corregir</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="prblemas">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>40</y>
+              <width>131</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Shape::WinPanel</enum>
+            </property>
+            <property name="text">
+             <string>Problemas</string>
+            </property>
+           </widget>
+           <widget class="QTextEdit" name="enunciado">
+            <property name="geometry">
+             <rect>
+              <x>3</x>
+              <y>89</y>
+              <width>331</width>
+              <height>221</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QGroupBox" name="groupAnswer">
+            <property name="geometry">
+             <rect>
+              <x>9</x>
+              <y>329</y>
+              <width>221</width>
+              <height>131</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string/>
+            </property>
+            <widget class="QRadioButton" name="radioBtnA">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>10</y>
+               <width>90</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>A</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="radioBtnB">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>40</y>
+               <width>90</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>B</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="radioBtnC">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>70</y>
+               <width>90</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>C</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="radioBtnD">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>100</y>
+               <width>90</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>D</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QComboBox" name="comboBox">
+            <property name="geometry">
+             <rect>
+              <x>160</x>
+              <y>40</y>
+              <width>72</width>
+              <height>24</height>
+             </rect>
             </property>
            </widget>
           </widget>
