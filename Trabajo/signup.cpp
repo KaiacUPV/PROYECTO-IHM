@@ -3,6 +3,7 @@
 #include "navigation.h"
 #include <QMessageBox>
 #include <QDate>
+#include <QFileDialog>
 
 signup::signup(QWidget *parent)
     : QWidget(parent)
@@ -12,6 +13,7 @@ signup::signup(QWidget *parent)
 
     connect(ui->Accept_Button, &QPushButton::clicked, this, &signup::onAccept);
     connect(ui->Cancel_Button, &QPushButton::clicked, this, &signup::onCancel);
+    connect(ui->Btn_Avatar, &QPushButton::clicked, this, &signup::on_btn_avatar_clicked );
 
     ui->lblUserAvatar->setPixmap(QPixmap(":icon/resources/icons/perfil.jpg"));
     ui->lblUserAvatar->setScaledContents(true);
@@ -26,9 +28,11 @@ signup::~signup()
 
 void signup::onAccept()
 {
+    QString nick = ui->txt_nick->text();
     QString email = ui->Text_Email->text().trimmed();
     QString pass1 = ui->lineEdit_2->text();
     QString pass2 = ui->lineEdit_3->text();
+    QDate birth = ui->date_birth->date();
 
     if (email.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
         QMessageBox::warning(this, "Error", "Debes rellenar todos los campos.");
@@ -39,7 +43,14 @@ void signup::onAccept()
         QMessageBox::warning(this, "Error", "Las contraseñas no coinciden.");
         return;
     }
+    QImage avatarFinal;
 
+    if (selectedAvatar.isNull()) {
+        // Imagen por defecto
+        avatarFinal.load(":/icon/resources/icons/perfil.jpg");
+    } else {
+        avatarFinal = selectedAvatar;
+    }
     auto &nav = Navigation::instance();
     const auto &usersMap = nav.users();
 
@@ -53,11 +64,11 @@ void signup::onAccept()
 
     // Crear usuario: nickname = email (puedes cambiar esto a otro campo si tienes uno en UI)
     User newUser(
-        email,                // nickName
+        nick,                // nickName
         email,                // email
         pass1,                // password
-        QImage(),             // avatar vacío
-        QDate::currentDate()  // birthdate (fecha actual)
+        avatarFinal,             // avatar vacío
+        birth  // birthdate (fecha actual)
         );
 
     // Guardar en BD: saveUser espera User& en tu header
@@ -81,4 +92,21 @@ void signup::onAccept()
 void signup::onCancel()
 {
     close();
+}
+void signup::on_btn_avatar_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        "Seleccionar avatar",
+        "",
+        "Imágenes (*.png *.jpg *.jpeg *.bmp)"
+        );
+
+    if (!fileName.isEmpty()) {
+        selectedAvatar.load(fileName);
+
+        ui->lblUserAvatar->setPixmap(
+            QPixmap::fromImage(selectedAvatar).scaled(128,128, Qt::KeepAspectRatio)
+            );
+    }
 }

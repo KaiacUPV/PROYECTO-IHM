@@ -22,9 +22,12 @@ signals:
 private slots:
     void onAccept();
     void onCancel();
+    void on_btn_avatar_clicked();
 
 private:
     Ui::signup *ui;
+    QImage selectedAvatar;
+
 };
 
 #endif // SIGNUP_H

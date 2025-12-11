@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <random>
 
-#include "usuario.h" // tu diálogo de login
+//#include "usuario.h" // tu diálogo de login
 #include "login.h"
 #include "signup.h"
 
@@ -81,12 +81,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnBack2->setIcon(QIcon(":icon/resources/icons/back.png"));
     ui->btnBack2->setIconSize(iconSize);
 
-    //-----Perfil por defecto-----
-    QPixmap pixmap(":icon/resources/icons/perfil.jpg");   // Ruta del recurso o archivo
-    ui->lblUserAvatar->setPixmap(pixmap);
-    ui->lblUserAvatar->setScaledContents(true);
-
-
     // === Insertar el QGraphicsView dentro del mapwidget ===
     view = new QGraphicsView(ui->mapwidget);
     view->setScene(scene);
@@ -98,6 +92,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Cargar carta náutica
     loadCarta();
+
+    updateUserAvatar(); // Esto mostrará perfil por defecto
+
 
     // Recibir eventos del ratón
     view->viewport()->installEventFilter(this);
@@ -305,6 +302,23 @@ void MainWindow::onPerfil()
     sizes << 150 << 400;  // izquierda, derecha (ajusta a tu gusto)
     ui->splitter->setSizes(sizes);
 }
+void MainWindow::updateUserAvatar()
+{
+    if (m_isLogged) {
+        // Usuario logueado → mostrar su avatar
+        QPixmap pixmap = QPixmap::fromImage(m_loggedUser.avatar());
+        ui->lblUserAvatar->setPixmap(pixmap.scaled(128,128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->lblUserAvatar_2->setPixmap(pixmap.scaled(128,128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    } else {
+        // No hay usuario → mostrar avatar por defecto
+        QPixmap pixmap(":/icon/resources/icons/perfil.jpg");
+        ui->lblUserAvatar->setPixmap(pixmap.scaled(128,128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->lblUserAvatar_2->setPixmap(pixmap.scaled(128,128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+    ui->lblUserAvatar_2->setScaledContents(true);
+    ui->lblUserAvatar->setScaledContents(true);
+}
+
 void MainWindow::onlogin()
 {
     login *dlg = new login();
@@ -318,6 +332,9 @@ void MainWindow::onlogin()
                 this->currentNickName = u.nickName();
                 // marca que hay alguien logeado si lo necesitas
                 this->m_isLogged = true;
+
+                // Actualizar avatar en la interfaz
+                updateUserAvatar();
 
                 QMessageBox::information(this, "Bienvenido",
                                          "Bienvenido " + u.nickName());
@@ -342,6 +359,7 @@ void MainWindow::onlogin()
 
                 reg->show();
             });
+
 
     dlg->show();
 }

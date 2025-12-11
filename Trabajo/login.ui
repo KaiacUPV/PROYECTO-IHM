@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>452</height>
+    <width>530</width>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,106 +43,11 @@
      <x>9</x>
      <y>111</y>
      <width>508</width>
-     <height>330</height>
+     <height>271</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <widget class="QLabel" name="leEmail">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Email</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="groupUsuario">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="lblUserAvatar">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>80</width>
-           <height>80</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>70</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">    border: 2px solid black;
-    border-radius: 60px;</string>
-         </property>
-         <property name="text">
-          <string>Perfil</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="Btn_Avatar">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Editar</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="6" column="3">
-     <widget class="QPushButton" name="Cancel_Button">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Cancel</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="2">
+    <item row="5" column="2">
      <widget class="QPushButton" name="Accept_Button">
       <property name="font">
        <font>
@@ -154,7 +59,50 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="0">
+    <item row="2" column="0" colspan="3">
+     <widget class="QLabel" name="Password_Label">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Password</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3">
+     <widget class="QPushButton" name="Cancel_Button">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="4" column="0">
      <widget class="QLabel" name="Repeat_Label">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -172,31 +120,10 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="3">
+    <item row="1" column="0" colspan="3">
      <widget class="QLineEdit" name="Text_Email"/>
     </item>
-    <item row="3" column="0" colspan="3">
-     <widget class="QLabel" name="Password_Label">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Password (Debe contener de 8-15 y tener letra y número)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLineEdit" name="lineEdit_2"/>
-    </item>
-    <item row="6" column="0">
+    <item row="5" column="0">
      <widget class="QToolButton" name="btnsingup">
       <property name="minimumSize">
        <size>
@@ -209,18 +136,26 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="1">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Orientation::Horizontal</enum>
+    <item row="3" column="0">
+     <widget class="QLineEdit" name="lineEdit_2"/>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="leEmail">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
       </property>
-     </spacer>
+      <property name="text">
+       <string>Email / Nickname</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

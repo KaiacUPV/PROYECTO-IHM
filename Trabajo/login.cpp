@@ -13,9 +13,6 @@ login::login(QWidget *parent)
     connect(ui->Cancel_Button, &QPushButton::clicked, this, &login::onCancel);
     connect(ui->btnsingup,     &QToolButton::clicked, this, &login::onSignup);
 
-    ui->lblUserAvatar->setPixmap(QPixmap(":icon/resources/icons/perfil.jpg"));
-    ui->lblUserAvatar->setScaledContents(true);
-
     setWindowTitle("Carta Náutica - IniciarS Sesión");
 }
 
@@ -40,14 +37,16 @@ void login::onAccept()
     bool found = false;
     User foundUser;
 
-    // Buscar por nickName (clave) o por email (campo)
+    QString input = emailOrNick.trimmed().toLower();
+
     for (const User &u : usersMap) {
-        if (u.nickName() == emailOrNick || u.email() == emailOrNick) {
+        if (u.nickName().toLower() == input || u.email().toLower() == input) {
             foundUser = u;
             found = true;
             break;
         }
     }
+
 
     if (!found) {
         QMessageBox::critical(this, "Error", "El usuario no existe.");

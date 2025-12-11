@@ -109,7 +109,7 @@ private:
     //Sesiones
     User m_loggedUser;
     bool m_isLogged = false;
-
+    void updateUserAvatar();
 
     void initializeProblems();
     void loadProblem(int index);
