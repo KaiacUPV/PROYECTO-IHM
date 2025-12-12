@@ -110,6 +110,7 @@ private:
     User m_loggedUser;
     bool m_isLogged = false;
     void updateUserAvatar();
+    Session m_currentSession;
 
     void initializeProblems();
     void loadProblem(int index);

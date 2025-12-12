@@ -265,11 +265,13 @@ void MainWindow::on_btnCorregir_clicked()
     {
         QMessageBox::information(this, "Correcto", "¡Respuesta correcta!");
         m_sessionHits++;
+        m_currentSession = Session(m_currentSession.timeStamp(), m_sessionHits, m_sessionFaults);
     }
     else
     {
         QMessageBox::critical(this, "Incorrecto", "La respuesta no es correcta.");
         m_sessionFaults++;
+        m_currentSession = Session(m_currentSession.timeStamp(), m_sessionHits, m_sessionFaults);
     }
 }
 
@@ -333,6 +335,11 @@ void MainWindow::onlogin()
                 // marca que hay alguien logeado si lo necesitas
                 this->m_isLogged = true;
 
+                // Reiniciar datos de sesión
+                m_sessionHits = 0;
+                m_sessionFaults = 0;
+                m_currentSession = Session(QDateTime::currentDateTime(), 0, 0);
+
                 // Actualizar avatar en la interfaz
                 updateUserAvatar();
 
@@ -366,6 +373,18 @@ void MainWindow::onlogin()
 
 void MainWindow::back()
 {
+    if (m_isLogged)
+    {
+        Navigation::instance().addSession(
+            currentNickName,
+            Session(QDateTime::currentDateTime(), m_sessionHits, m_sessionFaults)
+            );
+
+        m_sessionHits = 0;
+        m_sessionFaults = 0;
+    }
+
+
     ui->stackedWidget->setCurrentWidget(ui->page);
 
     // Expandir el splitter hacia la derecha
