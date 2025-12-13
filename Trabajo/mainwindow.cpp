@@ -10,6 +10,10 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QButtonGroup>
+#include <QShortcut>
+#include <limits>
+#include <QPainter>
+#include <QPainterPath>
 #include <QRandomGenerator>
 #include <algorithm>
 #include <random>
@@ -143,6 +147,29 @@ MainWindow::MainWindow(QWidget *parent)
     // Inicializar datos de usuario (por defecto)
     loadProfileUI();
 
+    // --- Small visual polish: stylesheet and avatar-radius ---
+    const QString qss = R"(
+        QMainWindow { background-color: #F3F6F8; font-family: 'Segoe UI', Arial, sans-serif; }
+        QGroupBox { background-color: #FFFFFF; border: 1px solid #E0E6ED; border-radius: 8px; padding: 8px; }
+        QToolButton { background: transparent; border-radius: 4px; padding: 2px; }
+        QToolButton:hover { background-color: rgba(0,0,0,0.05); }
+        QToolButton:checked { background-color: rgba(25,118,210,0.12); border: 1px solid rgba(25,118,210,0.2); }
+        QPushButton { background-color: #1976D2; color: white; padding: 6px 12px; border-radius: 6px; }
+        QPushButton:hover { background-color: #155fa0; }
+        QPushButton#btnguardar { background-color: #2E7D32; }
+        QPushButton#pushButton_2 { background-color: #9E9E9E; }
+        QLabel#lblUserAvatar_2 { border-radius: 40px; border: 2px solid #d0d7de; }
+        QLabel#lblUserAvatar { border-radius: 64px; border: 2px solid #d0d7de; }
+        QLabel#lblUsuario { font-weight: 600; font-size: 14px; }
+        QRadioButton::indicator { width: 18px; height: 18px; }
+        QGroupBox#groupProblems { background-color: #FFFFFF; }
+        QGroupBox#groupTools { background-color: #FFFFFF; }
+    )";
+    this->setStyleSheet(qss);
+
+    ui->lblUserAvatar_2->setScaledContents(true);
+    ui->lblUserAvatar_2->setMinimumSize(80,80);
+
     // --- Conexiones problemas ---
     connect(ui->btnBack2, &QToolButton::clicked, this, &MainWindow::back);
 
@@ -172,10 +199,74 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     setWindowTitle("Carta Náutica - IHM");
+
+    // Make drawing tool buttons checkable and group them for exclusive selection
+    QButtonGroup *toolButtons = new QButtonGroup(this);
+    toolButtons->setExclusive(true);
+    ui->btnTexto->setCheckable(true);
+    ui->btnPunto->setCheckable(true);
+    ui->btnLinea->setCheckable(true);
+    ui->btnArco->setCheckable(true);
+    ui->btnColor->setCheckable(true);
+    ui->btnMover->setCheckable(true);
+    ui->btnBorrar->setCheckable(true);
+    ui->btnRegla->setCheckable(true);
+    ui->btnCompas->setCheckable(true);
+    ui->btnTransportador->setCheckable(true);
+    toolButtons->addButton(ui->btnTexto);
+    toolButtons->addButton(ui->btnPunto);
+    toolButtons->addButton(ui->btnLinea);
+    toolButtons->addButton(ui->btnArco);
+    toolButtons->addButton(ui->btnColor);
+    toolButtons->addButton(ui->btnMover);
+    toolButtons->addButton(ui->btnBorrar);
+    toolButtons->addButton(ui->btnRegla);
+    toolButtons->addButton(ui->btnCompas);
+    toolButtons->addButton(ui->btnTransportador);
+
+    // Theme toggle shortcut
+    QShortcut *themeShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
+    connect(themeShortcut, &QShortcut::activated, this, &MainWindow::toggleTheme);
+}
+
+QPixmap MainWindow::makeRoundedPixmap(const QPixmap &src, int diameter)
+{
+    if (src.isNull()) return QPixmap();
+    QPixmap pm = src.scaled(diameter, diameter, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    QPixmap rounded(diameter, diameter);
+    rounded.fill(Qt::transparent);
+    QPainter painter(&rounded);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QPainterPath path;
+    path.addEllipse(0, 0, diameter, diameter);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pm);
+    return rounded;
+}
+
+void MainWindow::setCircularLabel(QLabel *label, const QPixmap &pixmap, int diameter)
+{
+    if (!label) return;
+    label->setFixedSize(diameter, diameter);
+    label->setPixmap(pixmap);
+    label->setScaledContents(true);
+    label->setMask(QRegion(0, 0, diameter, diameter, QRegion::Ellipse));
 }
 
 MainWindow::~MainWindow()
 {
+    // Persist pending session if the user is still logged in
+    if (m_isLogged) {
+        try {
+            auto &nav = Navigation::instance();
+            Session s(m_currentSession.timeStamp(), m_sessionHits, m_sessionFaults);
+            nav.addSession(currentNickName, s);
+            nav.dao().addSession(currentNickName, s);
+        } catch (...) {
+            // swallow errors in destructor; nothing to do
+        }
+    }
+
     delete ui;
 }
 
@@ -192,7 +283,7 @@ void MainWindow::loadProfileUI()
         ui->dateUser->setDate(m_loggedUser.birthdate());
 
         QPixmap pixmap = QPixmap::fromImage(m_loggedUser.avatar());
-        ui->lblUserAvatar_2->setPixmap(pixmap.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        setCircularLabel(ui->lblUserAvatar_2, makeRoundedPixmap(pixmap, 80), 80);
 
         // Mostrar contraseña cuando hay sesión iniciada
         ui->line_contra->setEchoMode(QLineEdit::Normal);
@@ -203,7 +294,7 @@ void MainWindow::loadProfileUI()
         ui->line_email->setText("");
         ui->line_contra->setText("");
         ui->dateUser->setDate(QDate::currentDate());
-        ui->lblUserAvatar_2->setPixmap(QPixmap(":/icon/resources/icons/perfil.jpg").scaled(80, 80, Qt::KeepAspectRatio));
+        ui->lblUserAvatar_2->setPixmap(makeRoundedPixmap(QPixmap(":/icon/resources/icons/perfil.jpg"), 80));
         currentAvatarPath = "";
 
         // Enmascarar contraseña cuando no haya sesión
@@ -229,7 +320,7 @@ void MainWindow::onEditAvatar()
         }
 
         currentAvatarPath = filePath;
-        ui->lblUserAvatar_2->setPixmap(pixmap.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        setCircularLabel(ui->lblUserAvatar_2, makeRoundedPixmap(pixmap, 80), 80);
         QMessageBox::information(this, "Éxito", "Avatar seleccionado. Guarda los cambios para aplicarlo.");
     }
 }
@@ -325,7 +416,7 @@ void MainWindow::onSaveProfile()
     // GUARDAR EN BD (navigationdao)
     // ========================================
     try {
-        //auto &nav = Navigation::instance();
+        auto &nav = Navigation::instance();
 
         // Crear usuario actualizado (orden correcto de argumentos)
         User updatedUser(
@@ -339,8 +430,10 @@ void MainWindow::onSaveProfile()
         // Actualizar en memoria
         m_loggedUser = updatedUser;
 
-        // Persistir cambio (si Navigation::updateUser existe)
-        //nav.updateUser(updatedUser);
+        // Actualizar en memoria
+        nav.updateUser(updatedUser);
+        // Persistir cambio en la base de datos
+        nav.dao().updateUser(updatedUser);
 
         QMessageBox::information(this, "Éxito", "Perfil actualizado correctamente.");
 
@@ -558,12 +651,14 @@ void MainWindow::updateUserAvatar()
 {
     if (m_isLogged) {
         QPixmap pixmap = QPixmap::fromImage(m_loggedUser.avatar());
-        ui->lblUserAvatar->setPixmap(pixmap.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        ui->lblUserAvatar_2->setPixmap(pixmap.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        QPixmap roundedMain = makeRoundedPixmap(pixmap, 128);
+        QPixmap roundedSmall = makeRoundedPixmap(pixmap, 80);
+        setCircularLabel(ui->lblUserAvatar, roundedMain, 128);
+        setCircularLabel(ui->lblUserAvatar_2, roundedSmall, 80);
     } else {
         QPixmap pixmap(":/icon/resources/icons/perfil.jpg");
-        ui->lblUserAvatar->setPixmap(pixmap.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        ui->lblUserAvatar_2->setPixmap(pixmap.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        setCircularLabel(ui->lblUserAvatar, makeRoundedPixmap(pixmap, 128), 128);
+        setCircularLabel(ui->lblUserAvatar_2, makeRoundedPixmap(pixmap, 80), 80);
     }
     ui->lblUserAvatar_2->setScaledContents(true);
     ui->lblUserAvatar->setScaledContents(true);
@@ -574,47 +669,53 @@ void MainWindow::onlogin()
     login *dlg = new login();
     dlg->setAttribute(Qt::WA_DeleteOnClose);
 
-    connect(dlg, &login::loginSuccess,
-            this, [this](const User &u)
-            {
-                this->m_loggedUser = u;
-                this->currentNickName = u.nickName();
-                this->m_isLogged = true;
-
-                // Reiniciar datos de sesión
-                m_sessionHits = 0;
-                m_sessionFaults = 0;
-                m_currentSession = Session(QDateTime::currentDateTime(), 0, 0);
-
-                updateUserAvatar();
-
-                // Mostrar contraseña y cargar UI del perfil
-                loadProfileUI();
-
-                QMessageBox::information(this, "Bienvenido",
-                                         "Bienvenido " + u.nickName());
-
-                ui->stackedWidget->setCurrentWidget(ui->page);
-
-                QList<int> sizes;
-                sizes << 150 << 900;
-                ui->splitter->setSizes(sizes);
-            });
+    connect(dlg, &login::loginSuccess, this, &MainWindow::onLoginSuccess);
 
     connect(dlg, &login::openSignup, this, [this]()
             {
                 signup *reg = new signup();
                 reg->setAttribute(Qt::WA_DeleteOnClose);
 
-                connect(reg, &signup::signupSuccess, this, [this]()
-                        {
-                            QMessageBox::information(this, "Registro", "Cuenta creada. Ahora inicia sesión.");
-                        });
+                connect(reg, &signup::signupSuccess, this, &MainWindow::onLoginSuccess);
 
                 reg->show();
             });
 
     dlg->show();
+}
+
+void MainWindow::onLoginSuccess(const User &u)
+{
+    this->m_loggedUser = u;
+    this->currentNickName = u.nickName();
+    this->m_isLogged = true;
+
+    // Reiniciar datos de sesión
+    m_sessionHits = 0;
+    m_sessionFaults = 0;
+    m_currentSession = Session(QDateTime::currentDateTime(), 0, 0);
+
+    updateUserAvatar();
+
+    // Cargar sesiones del usuario desde la BD y actualizar memoria
+    try {
+        auto &nav = Navigation::instance();
+        QVector<Session> sessions = nav.dao().loadSessionsFor(u.nickName());
+        m_loggedUser.setSessions(sessions);
+        nav.updateUser(m_loggedUser);
+    } catch (...) {
+        // ignore DB errors here — UI still loads
+    }
+
+    // Mostrar contraseña y cargar UI del perfil
+    loadProfileUI();
+
+
+    ui->stackedWidget->setCurrentWidget(ui->page);
+
+    QList<int> sizes;
+    sizes << 150 << 900;
+    ui->splitter->setSizes(sizes);
 }
 
 // NEW: logout implementation
@@ -637,10 +738,16 @@ void MainWindow::onLogout()
     onSaveProfile();
 
     // 2) Registrar la sesión y persistir el registro
-    Navigation::instance().addSession(
-        currentNickName,
-        Session(QDateTime::currentDateTime(), m_sessionHits, m_sessionFaults)
-    );
+    {
+        try {
+            auto &nav = Navigation::instance();
+            Session s(QDateTime::currentDateTime(), m_sessionHits, m_sessionFaults);
+            nav.addSession(currentNickName, s);
+            nav.dao().addSession(currentNickName, s);
+        } catch (const std::exception &ex) {
+            QMessageBox::warning(this, "Advertencia", QString("No se pudo guardar la sesión: ") + QString::fromStdString(ex.what()));
+        }
+    }
 
     // 3) Reset UI y estado
     m_sessionHits = 0;
@@ -660,17 +767,23 @@ void MainWindow::onLogout()
     ui->stackedWidget->setCurrentWidget(ui->page);
     QList<int> sizes; sizes << 150 << 100; ui->splitter->setSizes(sizes);
 
-    QMessageBox::information(this, "Sesión cerrada", "Sesión cerrada y cambios guardados.");
+    //QMessageBox::information(this, "Sesión cerrada", "Sesión cerrada y cambios guardados.");
 }
 
 void MainWindow::back()
 {
     if (m_isLogged)
     {
-        Navigation::instance().addSession(
-            currentNickName,
-            Session(QDateTime::currentDateTime(), m_sessionHits, m_sessionFaults)
-            );
+        {
+            try {
+                auto &nav = Navigation::instance();
+                Session s(QDateTime::currentDateTime(), m_sessionHits, m_sessionFaults);
+                nav.addSession(currentNickName, s);
+                nav.dao().addSession(currentNickName, s);
+            } catch (const std::exception &ex) {
+                QMessageBox::warning(this, "Advertencia", QString("No se pudo guardar la sesión: ") + QString::fromStdString(ex.what()));
+            }
+        }
 
         m_sessionHits = 0;
         m_sessionFaults = 0;
@@ -737,6 +850,7 @@ void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; }
 void MainWindow::onLimpiar()
 {
     loadCarta();
+    clearArcPreview();
 }
 
 void MainWindow::onRegla()
@@ -748,6 +862,7 @@ void MainWindow::onRegla()
     }
 
     // Toggle placement on repeated clicks: if already placed, unplace for repositioning
+    clearArcPreview();
     if (regla->isPlaced())
     {
         regla->setPlaced(false);
@@ -759,6 +874,7 @@ void MainWindow::onRegla()
         regla->setPlaced(true);
         statusBar()->showMessage("Regla colocada: Mantén Ctrl y arrastra para moverla", 5000);
     }
+    ui->btnRegla->setChecked(regla->isPlaced());
 }
 
 void MainWindow::onCompas()
@@ -769,7 +885,10 @@ void MainWindow::onCompas()
         scene->addItem(compas);
     }
 
-    centerToolOnView(compas);
+    clearArcPreview();
+    if (compas->isPlaced()) { compas->setPlaced(false); statusBar()->showMessage("Compás desbloqueado: arrastra para mover", 4000); }
+    else { centerToolOnView(compas); compas->setPlaced(true); statusBar()->showMessage("Compás colocado: Mantén Ctrl y arrastra para moverlo", 4000); }
+    ui->btnCompas->setChecked(compas->isPlaced());
 }
 
 void MainWindow::onTransportador()
@@ -780,7 +899,10 @@ void MainWindow::onTransportador()
         scene->addItem(transportador);
     }
 
-    centerToolOnView(transportador);
+    clearArcPreview();
+    if (transportador->isPlaced()) { transportador->setPlaced(false); statusBar()->showMessage("Transportador desbloqueado: arrastra para mover", 4000); }
+    else { centerToolOnView(transportador); transportador->setPlaced(true); statusBar()->showMessage("Transportador colocado: Mantén Ctrl y arrastra para moverlo", 4000); }
+    ui->btnTransportador->setChecked(transportador->isPlaced());
 }
 
 void MainWindow::centerToolOnView(Tool *tool)
@@ -829,6 +951,48 @@ void MainWindow::applyZoom(double factor)
     zoomLevel = newZoom;
 }
 
+Tool *MainWindow::findNearestPlacedTool(const QPointF &scenePoint)
+{
+    Tool *best = nullptr;
+    double bestDist = std::numeric_limits<double>::infinity();
+
+    auto checkTool = [&](Tool *tool) {
+        if (!tool || !tool->isPlaced()) return;
+        QPointF proj = tool->projectPoint(scenePoint, Tool::EdgeTop);
+        double d = QLineF(scenePoint, proj).length();
+        if (d < bestDist) { bestDist = d; best = tool; }
+    };
+
+    checkTool(regla);
+    checkTool(compas);
+    checkTool(transportador);
+
+    return best;
+}
+
+void MainWindow::toggleTheme()
+{
+    m_darkTheme = !m_darkTheme;
+    if (m_darkTheme) {
+        const QString dark = R"(
+            QMainWindow { background-color: #121212; color: #E0E0E0; }
+            QGroupBox { background-color: #1E1E1E; border: 1px solid #333; }
+            QPushButton { background-color: #BB86FC; color: #000000; }
+            QToolButton { background-color: transparent; }
+        )";
+        this->setStyleSheet(dark);
+        statusBar()->showMessage("Tema oscuro activado", 2000);
+    } else {
+        // Reapply the previous light theme
+        const QString light = R"(
+            QMainWindow { background-color: #F3F6F8; color: #222; }
+            QGroupBox { background-color: #FFFFFF; border: 1px solid #E0E6ED; border-radius: 8px; }
+        )";
+        this->setStyleSheet(light);
+        statusBar()->showMessage("Tema claro activado", 2000);
+    }
+}
+
 // ==========================================================
 //     EVENTOS DE RATÓN
 // ==========================================================
@@ -845,6 +1009,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             // CLICK DERECHO → MOVER MAPA
             if (e->button() == Qt::RightButton)
             {
+                clearArcPreview();
                 view->setDragMode(QGraphicsView::ScrollHandDrag);
 
                 QMouseEvent fakePress(
@@ -903,8 +1068,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 if (currentTool == TOOL_LINEA)
                 {
                     drawingLine = true;
-                    if (regla && regla->isPlaced())
-                        lineStart = regla->projectPoint(p, Tool::EdgeTop);
+                    Tool *t = findNearestPlacedTool(p);
+                    if (t)
+                        lineStart = t->projectPoint(p, Tool::EdgeTop);
                     else
                         lineStart = p;
 
@@ -919,12 +1085,43 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 // ======================================================
                 if (currentTool == TOOL_ARCO)
                 {
-                    if (arcStep == 0) { arcA = p; arcStep = 1; }
-                    else if (arcStep == 1) { arcB = p; arcStep = 2; }
+                    if (arcStep == 0) {
+                        arcA = p; arcStep = 1;
+                        // Create center marker
+                        if (!arcMarkerCenter) {
+                            arcMarkerCenter = scene->addEllipse(arcA.x()-3, arcA.y()-3, 6, 6, QPen(Qt::darkGreen), QBrush(Qt::darkGreen));
+                            statusBar()->showMessage("Centro del arco fijado", 2500);
+                        } else {
+                            arcMarkerCenter->setRect(arcA.x()-3, arcA.y()-3, 6, 6);
+                        }
+                        statusBar()->showMessage("Punto inicio fijado; mueve el ratón y haz clic para finalizar el arco", 4000);
+                    }
+                    else if (arcStep == 1) {
+                        arcB = p; arcStep = 2;
+                        // Create start marker
+                        if (!arcMarkerStart)
+                            arcMarkerStart = scene->addEllipse(arcB.x()-3, arcB.y()-3, 6, 6, QPen(Qt::NoPen), QBrush(Qt::blue));
+                        else
+                            arcMarkerStart->setRect(arcB.x()-3, arcB.y()-3, 6, 6);
+                        // Prepare preview arc with radius from arcA to arcB
+                        double r = QLineF(arcA, arcB).length();
+                        QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
+                        QPainterPath path;
+                        double startAngle = QLineF(arcA, arcB).angle();
+                        path.arcMoveTo(rect, startAngle);
+                        // initialize with zero span
+                        if (!tempArc) {
+                            QPen previewPen(activeColor, activeWidth);
+                            previewPen.setStyle(Qt::DashLine);
+                            tempArc = scene->addPath(path, previewPen);
+                        } else {
+                            tempArc->setPath(path);
+                        }
+                    }
                     else
                     {
                         QPointF arcC = p;
-                        double r = QLineF(arcA, arcC).length();
+                        double r = QLineF(arcA, arcB).length();
 
                         if (r >= 5)
                         {
@@ -938,10 +1135,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                             path.arcMoveTo(rect, startAngle);
                             path.arcTo(rect, startAngle, span);
 
-                            scene->addPath(path, QPen(activeColor, activeWidth));
+                                scene->addPath(path, QPen(activeColor, activeWidth));
+                            statusBar()->showMessage("Arco añadido", 2500);
                         }
 
                         arcStep = 0;
+                        clearArcPreview();
                     }
                     return true;
                 }
@@ -971,11 +1170,54 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
             if (tempLine) {
                 QPointF end;
-                if (regla && regla->isPlaced())
-                    end = regla->projectPoint(p, Tool::EdgeTop);
+                Tool *t = findNearestPlacedTool(p);
+                if (t)
+                    end = t->projectPoint(p, Tool::EdgeTop);
                 else
                     end = p;
                 tempLine->setLine(QLineF(lineStart, end));
+            }
+
+            return true;
+        }
+
+        // ============================================================
+        //                PREVIEW PARA ARCO (mientras se dibuja)
+        // ============================================================
+        if (event->type() == QEvent::MouseMove && currentTool == TOOL_ARCO && arcStep == 2)
+        {
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
+            QPointF p = view->mapToScene(e->pos());
+
+            // Update preview arc with mouse position
+            double r = QLineF(arcA, arcB).length();
+            if (r >= 5) {
+                double startAngle = QLineF(arcA, arcB).angle();
+                double endAngle   = QLineF(arcA, p).angle();
+                double span = endAngle - startAngle;
+                if (span < 0) span += 360;
+
+                QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
+                QPainterPath path;
+                path.arcMoveTo(rect, startAngle);
+                path.arcTo(rect, startAngle, span);
+
+                if (!tempArc) {
+                    QPen previewPen(activeColor, activeWidth);
+                    previewPen.setStyle(Qt::DashLine);
+                    tempArc = scene->addPath(path, previewPen);
+                } else {
+                    tempArc->setPath(path);
+                }
+
+                // Marker end point on the circumference
+                QPointF arcC = QPointF(arcA.x() + r * qCos(qDegreesToRadians(endAngle)),
+                                       arcA.y() - r * qSin(qDegreesToRadians(endAngle)));
+                if (!arcMarkerEnd) {
+                    arcMarkerEnd = scene->addEllipse(arcC.x()-3, arcC.y()-3, 6, 6, QPen(Qt::NoPen), QBrush(Qt::red));
+                } else {
+                    arcMarkerEnd->setRect(arcC.x()-3, arcC.y()-3, 6, 6);
+                }
             }
 
             return true;
@@ -1033,6 +1275,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
 
     return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::clearArcPreview()
+{
+    if (tempArc) {
+        scene->removeItem(tempArc);
+        delete tempArc; tempArc = nullptr;
+    }
+    if (arcMarkerCenter) { scene->removeItem(arcMarkerCenter); delete arcMarkerCenter; arcMarkerCenter = nullptr; }
+    if (arcMarkerStart) { scene->removeItem(arcMarkerStart); delete arcMarkerStart; arcMarkerStart = nullptr; }
+    if (arcMarkerEnd) { scene->removeItem(arcMarkerEnd); delete arcMarkerEnd; arcMarkerEnd = nullptr; }
 }
 
 void MainWindow::onAnswerSelected()

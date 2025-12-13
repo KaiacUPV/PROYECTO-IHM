@@ -4,6 +4,9 @@
 #include <QGraphicsSvgItem>
 #include <QGraphicsSceneWheelEvent>
 class QGraphicsSceneMouseEvent;
+class QGraphicsSceneHoverEvent;
+class QGraphicsRectItem;
+class QGraphicsLineItem;
 #include <QSizeF>
 
 class Tool : public QGraphicsSvgItem
@@ -27,7 +30,10 @@ public:
 protected:
     void wheelEvent(QGraphicsSceneWheelEvent *event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
     void applyInitialScale();
@@ -37,6 +43,8 @@ private:
     double m_uniformScale = 1.0;
     double m_angleDeg     = 0.0;
     bool m_placed = false;
+    QGraphicsRectItem *m_topEdgeHighlight = nullptr;
+    QGraphicsLineItem *m_hoverGuide = nullptr;
 };
 
 #endif // TOOL_H

@@ -8,9 +8,11 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsTextItem>
 #include <QGraphicsEllipseItem>
+#include <QGraphicsPathItem>
 #include <QMouseEvent>
 #include <QSplitter>
 #include <QPixmap>
+#include <QLabel>
 #include <QColor>
 #include <QPointF>
 
@@ -45,6 +47,7 @@ private slots:
     void onCancelProfile();
     void onLogout();
     void onlogin();
+    void onLoginSuccess(const User &u);
     void back();
 
     // Problemas
@@ -74,11 +77,15 @@ private:
     void loadCarta();
     void updateUserAvatar();
     void centerToolOnView(Tool *tool);
+    Tool *findNearestPlacedTool(const QPointF &scenePoint);
+    void toggleTheme();
     bool validateEmail(const QString &email);
     bool validatePassword(const QString &password);
     void loadProfileUI();
 
     void applyZoom(double factor); // added declaration
+    QPixmap makeRoundedPixmap(const QPixmap &src, int diameter);
+    void setCircularLabel(QLabel *label, const QPixmap &pixmap, int diameter);
 
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
@@ -99,6 +106,7 @@ private:
     Tool *regla = nullptr;
     Tool *compas = nullptr;
     Tool *transportador = nullptr;
+    bool m_darkTheme = false;
 
     // Drawing
     QGraphicsLineItem *tempLine = nullptr;
@@ -122,6 +130,11 @@ private:
     int currentTool = TOOL_NONE;
     int arcStep = 0;
     QPointF arcA, arcB;
+    void clearArcPreview();
+    QGraphicsPathItem *tempArc = nullptr;
+    QGraphicsEllipseItem *arcMarkerCenter = nullptr;
+    QGraphicsEllipseItem *arcMarkerStart = nullptr;
+    QGraphicsEllipseItem *arcMarkerEnd = nullptr;
 
     // Problems
     Problem m_currentProblem;

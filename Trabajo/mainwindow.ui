@@ -37,7 +37,7 @@
       </property>
       <widget class="QWidget" name="mapwidget" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
          <horstretch>50</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -47,6 +47,11 @@
          <width>400</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">background-color: rgb(58, 147, 255);</string>
@@ -63,28 +68,31 @@
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>190</width>
             <height>0</height>
            </size>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(91, 91, 91);</string>
+          </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page">
            <widget class="QGroupBox" name="groupTools&#10;">
             <property name="geometry">
              <rect>
-              <x>0</x>
-              <y>250</y>
-              <width>162</width>
-              <height>541</height>
+              <x>10</x>
+              <y>270</y>
+              <width>171</width>
+              <height>491</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -398,8 +406,8 @@
            <widget class="QGroupBox" name="groupProblems">
             <property name="geometry">
              <rect>
-              <x>-10</x>
-              <y>190</y>
+              <x>10</x>
+              <y>200</y>
               <width>171</width>
               <height>61</height>
              </rect>
@@ -440,7 +448,7 @@
            <widget class="QGroupBox" name="groupUsuario">
             <property name="geometry">
              <rect>
-              <x>0</x>
+              <x>10</x>
               <y>0</y>
               <width>171</width>
               <height>191</height>
@@ -547,8 +555,8 @@
              <rect>
               <x>0</x>
               <y>30</y>
-              <width>351</width>
-              <height>471</height>
+              <width>363</width>
+              <height>301</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -566,6 +574,90 @@
              <string/>
             </property>
             <layout class="QGridLayout" name="gridLayout">
+             <item row="1" column="3">
+              <widget class="QPushButton" name="btnlogin_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Logout</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblUsuario">
+               <property name="text">
+                <string>ExampleNombre</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="3">
+              <widget class="QDateEdit" name="dateUser"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="Btn_Avatar">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Editar Avatar</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="4">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="5" column="0">
+              <widget class="QPushButton" name="btnguardar">
+               <property name="text">
+                <string>Guardar</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="4">
+              <widget class="QLineEdit" name="line_email"/>
+             </item>
+             <item row="5" column="3">
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="text">
+                <string>Cancelar</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="3">
+              <widget class="QLineEdit" name="line_contra">
+               <property name="echoMode">
+                <enum>QLineEdit::EchoMode::Normal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QWidget" name="widget" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout"/>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="lblUserAvatar_2">
                <property name="sizePolicy">
@@ -595,79 +687,6 @@
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0" colspan="2">
-              <widget class="QLineEdit" name="line_contra">
-               <property name="echoMode">
-                <enum>QLineEdit::EchoMode::Normal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="lblUsuario">
-               <property name="text">
-                <string>ExampleNombre</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QPushButton" name="btnguardar">
-               <property name="text">
-                <string>Guardar</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="2">
-              <widget class="QPushButton" name="pushButton_2">
-               <property name="text">
-                <string>Cancelar</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="Btn_Avatar">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Editar Avatar</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="3">
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="3" column="0" colspan="3">
-              <widget class="QLineEdit" name="line_email"/>
-             </item>
-             <item row="2" column="2">
-              <widget class="QDateEdit" name="dateUser"/>
-             </item>
-             <item row="1" column="2">
-              <widget class="QPushButton" name="btnlogin_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Logout</string>
                </property>
               </widget>
              </item>
@@ -802,7 +821,7 @@
               <rect>
                <x>0</x>
                <y>100</y>
-               <width>211</width>
+               <width>90</width>
                <height>21</height>
               </rect>
              </property>

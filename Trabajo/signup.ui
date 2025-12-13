@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>536</height>
+    <width>537</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>0</y>
-     <width>223</width>
-     <height>86</height>
+     <y>460</y>
+     <width>541</width>
+     <height>141</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -28,20 +28,20 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="font">
-    <font>
-     <pointsize>48</pointsize>
-    </font>
-   </property>
    <property name="text">
-    <string>Sign Up</string>
+    <string>• Nombre debe contenga entre 6 y 15 caracteres o dígitos sin espacios, pudiendo
+usar guiones o sub-guiones.
+• Contraseña debe contener entre 8 y 20 caracteres, incorpora al menos una letra
+en mayúsculas y minúsculas, así como algún dígito y algún carácter especial
+(!@#$%&amp;*()-+=).
+•Usuario tenga más de 16 años.</string>
    </property>
   </widget>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>90</y>
+     <y>30</y>
      <width>521</width>
      <height>441</height>
     </rect>

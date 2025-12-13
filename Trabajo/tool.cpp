@@ -5,7 +5,12 @@
 #include <QApplication>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QSvgRenderer>
+#include <QGraphicsRectItem>
+#include <QGraphicsLineItem>
+#include <QPen>
+#include <QBrush>
 
 Tool::Tool(const QString& svgResourcePath, QGraphicsItem* parent)
     : QGraphicsSvgItem(svgResourcePath, parent)
@@ -22,6 +27,9 @@ Tool::Tool(const QString& svgResourcePath, QGraphicsItem* parent)
     // Tamaño inicial = tamaño natural del SVG
     m_targetSizePx = boundingRect().size();
     applyInitialScale();
+
+    // Enable hover to show guide
+    setAcceptHoverEvents(true);
 }
 
 void Tool::setToolSize(const QSizeF& sizePx)
@@ -45,11 +53,30 @@ void Tool::applyInitialScale()
 
     if (scene())
         scene()->update();
+
+    // Update highlight if present
+    if (m_topEdgeHighlight) {
+        const QRectF br2 = boundingRect();
+        m_topEdgeHighlight->setRect(br2.left(), br2.top(), br2.width(), 4);
+    }
+    if (m_hoverGuide) {
+        const QRectF br2 = boundingRect();
+        m_hoverGuide->setLine(br2.left(), br2.top(), br2.right(), br2.top());
+    }
 }
 
 void Tool::updateOrigin()
 {
     setTransformOriginPoint(boundingRect().center());
+    // Update hover and highlight positions to match new boundingRect
+    if (m_topEdgeHighlight) {
+        const QRectF br = boundingRect();
+        m_topEdgeHighlight->setRect(br.left(), br.top(), br.width(), 4);
+    }
+    if (m_hoverGuide) {
+        const QRectF br = boundingRect();
+        m_hoverGuide->setLine(br.left(), br.top(), br.right(), br.top());
+    }
 }
 
 void Tool::wheelEvent(QGraphicsSceneWheelEvent *event)
@@ -90,9 +117,24 @@ void Tool::setPlaced(bool placed)
     setFlag(QGraphicsItem::ItemIsMovable, true);
     // Visual feedback: slightly reduce opacity when placed
     if (m_placed)
-        setOpacity(0.85);
+        setOpacity(0.95);
     else
         setOpacity(1.0);
+
+    // Update top-edge highlight rectangle
+    if (m_placed) {
+        if (!m_topEdgeHighlight) {
+            const QRectF br = boundingRect();
+            m_topEdgeHighlight = new QGraphicsRectItem(br.left(), br.top(), br.width(), 4, this);
+            m_topEdgeHighlight->setBrush(QBrush(QColor(255, 204, 0, 180)));
+            m_topEdgeHighlight->setPen(QPen(Qt::NoPen));
+            m_topEdgeHighlight->setZValue(this->zValue() + 1);
+        }
+        m_topEdgeHighlight->setVisible(true);
+    } else {
+        if (m_topEdgeHighlight)
+            m_topEdgeHighlight->setVisible(false);
+    }
 }
 
 QPointF Tool::projectPoint(const QPointF& scenePoint, ProjectEdge edge) const
@@ -135,5 +177,39 @@ void Tool::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
+    if (m_placed && (mods & Qt::ControlModifier))
+        setCursor(Qt::ClosedHandCursor);
     QGraphicsSvgItem::mousePressEvent(event);
+}
+
+void Tool::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    Q_UNUSED(event);
+    // Show a hover guide along the top edge
+    const QRectF br = boundingRect();
+    if (!m_hoverGuide) {
+        m_hoverGuide = new QGraphicsLineItem(br.left(), br.top(), br.right(), br.top(), this);
+        QPen pen(QColor(33, 150, 243, 220));
+        pen.setWidth(2);
+        m_hoverGuide->setPen(pen);
+        m_hoverGuide->setZValue(this->zValue() + 2);
+    }
+    m_hoverGuide->setVisible(true);
+    if (scene()) scene()->update();
+}
+
+void Tool::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    Q_UNUSED(event);
+    if (m_hoverGuide) {
+        m_hoverGuide->setVisible(false);
+        if (scene()) scene()->update();
+    }
+}
+
+void Tool::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    Q_UNUSED(event);
+    unsetCursor();
+    QGraphicsSvgItem::mouseReleaseEvent(event);
 }

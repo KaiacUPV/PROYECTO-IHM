@@ -1,10 +1,29 @@
 #include "signup.h"
 #include "ui_signup.h"
 #include "navigation.h"
+#include <QPainter>
+#include <QPainterPath>
 #include <QMessageBox>
 #include <QDate>
 #include <QFileDialog>
 #include <QRegularExpression>
+#include <QPixmap>
+#include <QImage>
+
+static QPixmap makeRoundedPixmapFromImage(const QImage &img, int diameter)
+{
+    if (img.isNull()) return QPixmap();
+    QPixmap pm = QPixmap::fromImage(img).scaled(diameter, diameter, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    QPixmap rounded(diameter, diameter);
+    rounded.fill(Qt::transparent);
+    QPainter painter(&rounded);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QPainterPath path;
+    path.addEllipse(0, 0, diameter, diameter);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pm);
+    return rounded;
+}
 
 signup::signup(QWidget *parent)
     : QWidget(parent)
@@ -16,7 +35,10 @@ signup::signup(QWidget *parent)
     connect(ui->Cancel_Button, &QPushButton::clicked, this, &signup::onCancel);
     connect(ui->Btn_Avatar, &QPushButton::clicked, this, &signup::on_btn_avatar_clicked );
 
-    ui->lblUserAvatar->setPixmap(QPixmap(":icon/resources/icons/perfil.jpg"));
+    // Render circular avatar preview
+    QPixmap roundedDefault = makeRoundedPixmapFromImage(QImage(":icon/resources/icons/perfil.jpg"), 128);
+    ui->lblUserAvatar->setPixmap(roundedDefault);
+    ui->lblUserAvatar->setMask(QRegion(0, 0, 128, 128, QRegion::Ellipse));
     ui->lblUserAvatar->setScaledContents(true);
 
     setWindowTitle("Carta Náutica - Registrarse");
@@ -133,7 +155,7 @@ void signup::onAccept()
         nav.addUser(newUser);        // agregar a memoria si procede
 
         QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
-        emit signupSuccess();
+        emit signupSuccess(newUser);
         close();
     } catch (const std::exception &e) {
         QMessageBox::critical(this, "Error", QString("No se pudo guardar el usuario: ") + QString::fromStdString(e.what()));
@@ -156,8 +178,8 @@ void signup::on_btn_avatar_clicked()
     if (!fileName.isEmpty()) {
         selectedAvatar.load(fileName);
 
-        ui->lblUserAvatar->setPixmap(
-            QPixmap::fromImage(selectedAvatar).scaled(128,128, Qt::KeepAspectRatio)
-            );
+        QPixmap roundedSelected = makeRoundedPixmapFromImage(selectedAvatar, 128);
+        ui->lblUserAvatar->setPixmap(roundedSelected);
+        ui->lblUserAvatar->setMask(QRegion(0, 0, 128, 128, QRegion::Ellipse));
     }
 }

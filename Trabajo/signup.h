@@ -17,7 +17,7 @@ public:
     ~signup();
 
 signals:
-    void signupSuccess();
+    void signupSuccess(const User &user);
 
 private slots:
     void onAccept();
