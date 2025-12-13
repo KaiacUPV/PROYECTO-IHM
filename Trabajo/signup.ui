@@ -99,7 +99,16 @@
      <widget class="QLineEdit" name="txt_nick"/>
     </item>
     <item row="6" column="0">
-     <widget class="QLineEdit" name="lineEdit_2"/>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="font">
+       <font>
+        <stylestrategy>PreferDefault</stylestrategy>
+       </font>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::PasswordEchoOnEdit</enum>
+      </property>
+     </widget>
     </item>
     <item row="8" column="1">
      <spacer name="horizontalSpacer">
@@ -208,12 +217,16 @@
        </font>
       </property>
       <property name="text">
-       <string>Password (Debe contener de 8-15 y tener letra y número)</string>
+       <string>Password  (8 y 20 caracteres)</string>
       </property>
      </widget>
     </item>
     <item row="8" column="0">
-     <widget class="QLineEdit" name="lineEdit_3"/>
+     <widget class="QLineEdit" name="lineEdit_3">
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::PasswordEchoOnEdit</enum>
+      </property>
+     </widget>
     </item>
     <item row="1" column="0">
      <widget class="QLabel" name="leName">

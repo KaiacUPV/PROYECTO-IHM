@@ -10,6 +10,9 @@
 #include <QGraphicsEllipseItem>
 #include <QMouseEvent>
 #include <QSplitter>
+#include <QPixmap>
+#include <QColor>
+#include <QPointF>
 
 #include <QGraphicsSvgItem>
 #include <QSvgRenderer>
@@ -30,13 +33,27 @@ public:
     ~MainWindow();
 
 protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     // Panel usuario / problemas
     void onPerfil();
     void onProblemas();
+    void onEditAvatar();
+    void onSaveProfile();
+    void onCancelProfile();
+    void onLogout();
+    void onlogin();
+    void back();
+
+    // Problemas
+    void initializeProblems();
+    void loadProblem(int index);
+    void on_btnAleatorio_clicked();
+    void on_comboBox_currentIndexChanged(int index);
+    void on_btnCorregir_clicked();
+    void onAnswerSelected();
 
     // Herramientas
     void onTexto();
@@ -45,78 +62,71 @@ private slots:
     void onArco();
     void onColor();
     void onMover();
-    void onRegla();
-    void onTransportador();
-    void onCompas();
     void onZoomIn();
     void onZoomOut();
     void onBorrar();
     void onLimpiar();
-
-    void back();
-    void onlogin();
-
-    // Problemas: slots conectados desde constructor
-    void on_btnAleatorio_clicked();
-    void on_comboBox_currentIndexChanged(int index);
-    void on_btnCorregir_clicked();
+    void onRegla();
+    void onCompas();
+    void onTransportador();
 
 private:
-    Ui::MainWindow *ui;
+    void loadCarta();
+    void updateUserAvatar();
+    void centerToolOnView(Tool *tool);
+    bool validateEmail(const QString &email);
+    bool validatePassword(const QString &password);
+    void loadProfileUI();
 
-    // Mapa
+    void applyZoom(double factor); // added declaration
+
+    Ui::MainWindow *ui;
     QGraphicsScene *scene;
-    QGraphicsView  *view;
+    QGraphicsView *view;
     QPixmap cartaPixmap;
 
-    // Estados de herramientas
-    enum ToolType { NONE, TOOL_PUNTO, TOOL_LINEA, TOOL_TEXTO, TOOL_ARCO,
-                    TOOL_COLOR, TOOL_MOVER, TOOL_REGLA, TOOL_BORRAR };
-    ToolType currentTool = NONE;
+    // Session / user
+    User m_loggedUser;
+    bool m_isLogged = false;
+    QString currentNickName;
+    QString currentAvatarPath;
+    int m_sessionHits = 0;
+    int m_sessionFaults = 0;
+    Session m_currentSession;
 
-    // Para dibujar líneas
-    bool drawingLine = false;
-    QPointF lineStart;
-    QGraphicsLineItem *tempLine = nullptr;
-
-    // Para arco
-    int arcStep = 0;
-    QPointF arcA, arcB;
-
-    // Color activo
-    QColor activeColor = Qt::red;
-    int activeWidth = 3;
-    int activeFontSize = 16;
-
-    // Zoom
+    // Graphics / tools
     double zoomLevel = 1.0;
-    void applyZoom(double factor);
-
     Tool *regla = nullptr;
     Tool *compas = nullptr;
     Tool *transportador = nullptr;
-    void centerToolOnView(Tool *tool);
 
-    // Problemas
+    // Drawing
+    QGraphicsLineItem *tempLine = nullptr;
+    bool drawingLine = false;
+    QPointF lineStart;
+    QColor activeColor = Qt::black;
+    int activeWidth = 2;
+    int activeFontSize = 12;
+
+    // Tools enum (ensure defined here)
+    enum ToolKind {
+        TOOL_NONE = 0,
+        TOOL_TEXTO,
+        TOOL_PUNTO,
+        TOOL_LINEA,
+        TOOL_ARCO,
+        TOOL_COLOR,
+        TOOL_MOVER,
+        TOOL_BORRAR
+    };
+    int currentTool = TOOL_NONE;
+    int arcStep = 0;
+    QPointF arcA, arcB;
+
+    // Problems
     Problem m_currentProblem;
     QVector<Answer> m_currentAnswersRandom;
     int m_correctAnswerIndex = -1;
-    QString currentNickName;
-
-    int m_sessionHits = 0;
-    int m_sessionFaults = 0;
-
-    //Sesiones
-    User m_loggedUser;
-    bool m_isLogged = false;
-    void updateUserAvatar();
-    Session m_currentSession;
-
-    void initializeProblems();
-    void loadProblem(int index);
-
-    // Cargar carta
-    void loadCarta();
 };
 
 #endif // MAINWINDOW_H

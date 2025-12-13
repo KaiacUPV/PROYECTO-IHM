@@ -72,5 +72,6 @@ void login::onCancel()
 void login::onSignup()
 {
     emit openSignup();
-    login::~login();
+    // Close the dialog and let Qt delete it (MainWindow creates it with WA_DeleteOnClose)
+    this->close();
 }

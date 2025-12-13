@@ -6,8 +6,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     signup.cpp \
-    tool.cpp \
-    usuario.cpp
+    tool.cpp
 
 HEADERS += \
     lib/include/navdaoexception.h \
@@ -23,8 +22,7 @@ HEADERS += \
 FORMS += \
     login.ui \
     mainwindow.ui \
-    signup.ui \
-    usuario.ui
+    signup.ui
 
 # Agregar esta línea (muy importante)
 INCLUDEPATH += $$PWD/lib/include
@@ -33,6 +31,7 @@ INCLUDEPATH += $$PWD/Headers
 LIBS += -L$$PWD/lib -lnavlib
 
 DISTFILES += \
+    lib/libnavlib.a \
     navdb.sqlite \
     resources/carta_nautica.jpg \
     resources/icons/arco.png \

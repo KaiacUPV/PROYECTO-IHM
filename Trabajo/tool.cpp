@@ -1,8 +1,10 @@
 #include "tool.h"
 
 #include <QtMath>
+#include <QtGlobal>
 #include <QApplication>
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QSvgRenderer>
 
 Tool::Tool(const QString& svgResourcePath, QGraphicsItem* parent)
@@ -73,4 +75,65 @@ void Tool::wheelEvent(QGraphicsSceneWheelEvent *event)
         scene()->update();
 
     event->accept();
+}
+
+void Tool::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    Q_UNUSED(event);
+    setPlaced(!m_placed);
+}
+
+void Tool::setPlaced(bool placed)
+{
+    m_placed = placed;
+    // Keep the item movable; movement will be controlled by event handlers
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    // Visual feedback: slightly reduce opacity when placed
+    if (m_placed)
+        setOpacity(0.85);
+    else
+        setOpacity(1.0);
+}
+
+QPointF Tool::projectPoint(const QPointF& scenePoint, ProjectEdge edge) const
+{
+    // Local endpoints along the horizontal center line of the bounding rect
+    const QRectF br = boundingRect();
+    if (br.isEmpty())
+        return mapToScene(br.center());
+
+    // Determine which local Y to use: center, top or bottom
+    qreal localY = br.center().y();
+    if (edge == EdgeTop) localY = br.top();
+    else if (edge == EdgeBottom) localY = br.bottom();
+
+    QPointF localA(br.left(), localY);
+    QPointF localB(br.right(), localY);
+
+    QPointF a = mapToScene(localA);
+    QPointF b = mapToScene(localB);
+
+    // Project point onto segment AB
+    const double dx = b.x() - a.x();
+    const double dy = b.y() - a.y();
+    const double len2 = dx*dx + dy*dy;
+    if (len2 <= 1e-8)
+        return a;
+
+    const double t = ((scenePoint.x()-a.x())*dx + (scenePoint.y()-a.y())*dy) / len2;
+    const double tc = qBound(0.0, t, 1.0);
+    return QPointF(a.x() + tc*dx, a.y() + tc*dy);
+}
+
+void Tool::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    const Qt::KeyboardModifiers mods = QApplication::keyboardModifiers();
+    if (m_placed && !(mods & Qt::ControlModifier)) {
+        // If placed and Ctrl isn't held, prevent movement but allow selection
+        setSelected(true);
+        event->accept();
+        return;
+    }
+
+    QGraphicsSvgItem::mousePressEvent(event);
 }

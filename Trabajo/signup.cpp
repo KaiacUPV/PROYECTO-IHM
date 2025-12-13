@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QDate>
 #include <QFileDialog>
+#include <QRegularExpression>
 
 signup::signup(QWidget *parent)
     : QWidget(parent)
@@ -28,65 +29,115 @@ signup::~signup()
 
 void signup::onAccept()
 {
-    QString nick = ui->txt_nick->text();
+    QString nick = ui->txt_nick->text().trimmed();
     QString email = ui->Text_Email->text().trimmed();
     QString pass1 = ui->lineEdit_2->text();
     QString pass2 = ui->lineEdit_3->text();
     QDate birth = ui->date_birth->date();
 
-    if (email.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Debes rellenar todos los campos.");
+    // Campos obligatorios
+    if (nick.isEmpty() || email.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Debes rellenar todos los campos obligatorios.");
         return;
     }
 
+    // nickname: 6..15 caracteres, letras/dígitos/guion/underscore, sin espacios
+    QRegularExpression nickRegex("^[A-Za-z0-9_-]{6,15}$");
+    if (!nickRegex.match(nick).hasMatch()) {
+        QMessageBox::warning(this, "Error",
+                             "El nombre de usuario debe tener entre 6 y 15 caracteres. "
+                             "Solo letras, dígitos, guiones y guiones bajos están permitidos.");
+        return;
+    }
+
+    // Contraseñas iguales
     if (pass1 != pass2) {
         QMessageBox::warning(this, "Error", "Las contraseñas no coinciden.");
         return;
     }
-    QImage avatarFinal;
 
+    // Contraseña: 8..20, al menos una mayúscula, minúscula, dígito y caracter especial (!@#$%&*()-+=)
+    if (pass1.length() < 8 || pass1.length() > 20) {
+        QMessageBox::warning(this, "Error", "La contraseña debe tener entre 8 y 20 caracteres.");
+        return;
+    }
+    if (!QRegularExpression("[A-Z]").match(pass1).hasMatch()) {
+        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos una letra mayúscula.");
+        return;
+    }
+    if (!QRegularExpression("[a-z]").match(pass1).hasMatch()) {
+        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos una letra minúscula.");
+        return;
+    }
+    if (!QRegularExpression("[0-9]").match(pass1).hasMatch()) {
+        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos un dígito.");
+        return;
+    }
+    if (!QRegularExpression(R"([!@#$%&*\(\)\-+=])").match(pass1).hasMatch()) {
+        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos un carácter especial (!@#$%&*()-+=).");
+        return;
+    }
+
+    // Email (formato)
+    QRegularExpression emailRegex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    if (!emailRegex.match(email).hasMatch()) {
+        QMessageBox::warning(this, "Error", "El correo electrónico no tiene un formato válido.");
+        return;
+    }
+
+    // Edad > 16 años
+    QDate today = QDate::currentDate();
+    int age = today.year() - birth.year();
+    if (today.month() < birth.month() || (today.month() == birth.month() && today.day() < birth.day())) {
+        age--;
+    }
+    if (age <= 16) {
+        QMessageBox::warning(this, "Error", "Debes tener más de 16 años para registrarte.");
+        return;
+    }
+
+    // Avatar elegido o por defecto
+    QImage avatarFinal;
     if (selectedAvatar.isNull()) {
-        // Imagen por defecto
         avatarFinal.load(":/icon/resources/icons/perfil.jpg");
     } else {
         avatarFinal = selectedAvatar;
     }
+
+    // Verificar usuario/email no usados
     auto &nav = Navigation::instance();
     const auto &usersMap = nav.users();
 
-    // Comprobar existencia por nick o email
     for (const User &u : usersMap) {
-        if (u.nickName() == email || u.email() == email) {
-            QMessageBox::warning(this,"Error","Este usuario ya existe.");
+        if (u.nickName().compare(nick, Qt::CaseInsensitive) == 0) {
+            QMessageBox::warning(this, "Error", "El nombre de usuario ya está en uso.");
+            return;
+        }
+        if (u.email().compare(email, Qt::CaseInsensitive) == 0) {
+            QMessageBox::warning(this, "Error", "El correo electrónico ya está registrado.");
             return;
         }
     }
 
-    // Crear usuario: nickname = email (puedes cambiar esto a otro campo si tienes uno en UI)
+    // Crear y persistir usuario
     User newUser(
-        nick,                // nickName
-        email,                // email
-        pass1,                // password
-        avatarFinal,             // avatar vacío
-        birth  // birthdate (fecha actual)
-        );
+        nick,         // nickName
+        email,        // email
+        pass1,        // password
+        avatarFinal,  // avatar
+        birth         // birthdate
+    );
 
-    // Guardar en BD: saveUser espera User& en tu header
-    // Nota: saveUser modifica el objeto (setInsertedInDb), así que pasamos una variable no-const
-    nav.dao().saveUser(newUser);
-
-    // También actualizar la colección en memoria (Navigation mantiene su propio mapa).
-    // Si Navigation::addUser existe, úsalo. De lo contrario, recarga:
     try {
-        nav.addUser(newUser);
-    } catch (...) {
-        // si no existe addUser o hay problemas - simplemente recargamos desde BD
-        nav.reload();
-    }
+        nav.dao().saveUser(newUser); // persistir
+        nav.addUser(newUser);        // agregar a memoria si procede
 
-    QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
-    emit signupSuccess();
-    close();
+        QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
+        emit signupSuccess();
+        close();
+    } catch (const std::exception &e) {
+        QMessageBox::critical(this, "Error", QString("No se pudo guardar el usuario: ") + QString::fromStdString(e.what()));
+    }
 }
 
 void signup::onCancel()
