@@ -1,7 +1,16 @@
 #include "login.h"
 #include "ui_login.h"
-#include "navigation.h"
 #include <QMessageBox>
+#include <QCryptographicHash>
+
+// HASH
+static QString hashPassword(const QString &password)
+{
+    return QCryptographicHash::hash(
+               password.toUtf8(),
+               QCryptographicHash::Sha256
+               ).toHex();
+}
 
 login::login(QWidget *parent)
     : QWidget(parent)
@@ -12,8 +21,14 @@ login::login(QWidget *parent)
     connect(ui->Accept_Button, &QPushButton::clicked, this, &login::onAccept);
     connect(ui->Cancel_Button, &QPushButton::clicked, this, &login::onCancel);
     connect(ui->btnsingup,     &QToolButton::clicked, this, &login::onSignup);
+    connect(ui->btnShowPassword, &QToolButton::toggled,
+            this, &login::onTogglePassword);
 
-    setWindowTitle("Carta Náutica - IniciarS Sesión");
+    ui->lineEdit_2->setEchoMode(QLineEdit::Password);
+    ui->btnShowPassword->setCheckable(true);
+    ui->btnShowPassword->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
+
+    setWindowTitle("Carta Náutica - Iniciar Sesión");
 }
 
 login::~login()
@@ -23,43 +38,40 @@ login::~login()
 
 void login::onAccept()
 {
-    QString emailOrNick = ui->Text_Email->text().trimmed();
-    QString pass         = ui->lineEdit_2->text();
+    QString input = ui->Text_Email->text().trimmed().toLower();
+    QString pass  = ui->lineEdit_2->text();
 
-    if (emailOrNick.isEmpty() || pass.isEmpty()) {
+    if (input.isEmpty() || pass.isEmpty()) {
         QMessageBox::warning(this, "Error", "Debes rellenar todos los campos.");
         return;
     }
 
     auto &nav = Navigation::instance();
-    const auto &usersMap = nav.users(); // QMap<QString, User>
+    const auto &usersMap = nav.users();
 
-    bool found = false;
     User foundUser;
-
-    QString input = emailOrNick.trimmed().toLower();
+    bool found = false;
 
     for (const User &u : usersMap) {
-        if (u.nickName().toLower() == input || u.email().toLower() == input) {
+        if (u.nickName().toLower() == input ||
+            u.email().toLower() == input) {
             foundUser = u;
             found = true;
             break;
         }
     }
 
-
     if (!found) {
         QMessageBox::critical(this, "Error", "El usuario no existe.");
         return;
     }
 
-    if (foundUser.password() != pass) {
+    if (foundUser.password() != hashPassword(pass)) {
         QMessageBox::critical(this, "Error", "Contraseña incorrecta.");
         return;
     }
 
-    // Éxito
-    QMessageBox::information(this,"Correcto","Inicio de sesión correcto.");
+    QMessageBox::information(this, "Correcto", "Inicio de sesión correcto.");
     emit loginSuccess(foundUser);
     close();
 }
@@ -72,6 +84,15 @@ void login::onCancel()
 void login::onSignup()
 {
     emit openSignup();
-    // Close the dialog and let Qt delete it (MainWindow creates it with WA_DeleteOnClose)
-    this->close();
+    close();
+}
+
+void login::onTogglePassword(bool checked)
+{
+    ui->lineEdit_2->setEchoMode(
+        checked ? QLineEdit::Normal : QLineEdit::Password
+        );
+    ui->btnShowPassword->setIcon(
+        QIcon(checked ? ":icon/resources/icons/eye-open.png" : ":icon/resources/icons/eye-closed.svg")
+        );
 }

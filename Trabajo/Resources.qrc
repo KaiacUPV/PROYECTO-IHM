@@ -21,5 +21,7 @@
         <file>resources/icons/zoom_out.png</file>
         <file>resources/icons/perfil.jpg</file>
         <file>resources/icons/back.png</file>
+        <file>resources/icons/eye-closed.svg</file>
+        <file>resources/icons/eye-open.png</file>
     </qresource>
 </RCC>

@@ -1,28 +1,18 @@
 #include "signup.h"
 #include "ui_signup.h"
-#include "navigation.h"
-#include <QPainter>
-#include <QPainterPath>
 #include <QMessageBox>
-#include <QDate>
 #include <QFileDialog>
+#include <QCryptographicHash>
 #include <QRegularExpression>
-#include <QPixmap>
-#include <QImage>
+#include <QDate>
 
-static QPixmap makeRoundedPixmapFromImage(const QImage &img, int diameter)
+// HASH
+static QString hashPassword(const QString &password)
 {
-    if (img.isNull()) return QPixmap();
-    QPixmap pm = QPixmap::fromImage(img).scaled(diameter, diameter, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-    QPixmap rounded(diameter, diameter);
-    rounded.fill(Qt::transparent);
-    QPainter painter(&rounded);
-    painter.setRenderHint(QPainter::Antialiasing);
-    QPainterPath path;
-    path.addEllipse(0, 0, diameter, diameter);
-    painter.setClipPath(path);
-    painter.drawPixmap(0, 0, pm);
-    return rounded;
+    return QCryptographicHash::hash(
+               password.toUtf8(),
+               QCryptographicHash::Sha256
+               ).toHex();
 }
 
 signup::signup(QWidget *parent)
@@ -33,16 +23,28 @@ signup::signup(QWidget *parent)
 
     connect(ui->Accept_Button, &QPushButton::clicked, this, &signup::onAccept);
     connect(ui->Cancel_Button, &QPushButton::clicked, this, &signup::onCancel);
-    connect(ui->Btn_Avatar, &QPushButton::clicked, this, &signup::on_btn_avatar_clicked );
+    connect(ui->Btn_Avatar, &QPushButton::clicked, this, &signup::on_btn_avatar_clicked);
 
-    // Render circular avatar preview
-    QPixmap roundedDefault = makeRoundedPixmapFromImage(QImage(":icon/resources/icons/perfil.jpg"), 128);
-    ui->lblUserAvatar->setPixmap(roundedDefault);
-    ui->lblUserAvatar->setMask(QRegion(0, 0, 128, 128, QRegion::Ellipse));
-    ui->lblUserAvatar->setScaledContents(true);
+    ui->btnShowPass1->setCheckable(true);
+    ui->btnShowPass2->setCheckable(true);
+
+    connect(ui->btnShowPass1, &QToolButton::toggled,
+            this, &signup::onTogglePassword1);
+    connect(ui->btnShowPass2, &QToolButton::toggled,
+            this, &signup::onTogglePassword2);
+
+    ui->lineEdit_2->setEchoMode(QLineEdit::Password);
+    ui->lineEdit_3->setEchoMode(QLineEdit::Password);
+
+    ui->btnShowPass1->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
+    ui->btnShowPass2->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
+
+    ui->btnShowPass1->setAutoRaise(true);
+    ui->btnShowPass2->setAutoRaise(true);
 
     setWindowTitle("Carta Náutica - Registrarse");
 }
+
 
 signup::~signup()
 {
@@ -51,135 +53,80 @@ signup::~signup()
 
 void signup::onAccept()
 {
-    QString nick = ui->txt_nick->text().trimmed();
+    QString nick  = ui->txt_nick->text().trimmed();
     QString email = ui->Text_Email->text().trimmed();
     QString pass1 = ui->lineEdit_2->text();
     QString pass2 = ui->lineEdit_3->text();
-    QDate birth = ui->date_birth->date();
 
-    // Campos obligatorios
-    if (nick.isEmpty() || email.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Debes rellenar todos los campos obligatorios.");
+    if (nick.isEmpty() || email.isEmpty() || pass1.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Campos obligatorios vacíos.");
         return;
     }
 
-    // nickname: 6..15 caracteres, letras/dígitos/guion/underscore, sin espacios
-    QRegularExpression nickRegex("^[A-Za-z0-9_-]{6,15}$");
-    if (!nickRegex.match(nick).hasMatch()) {
-        QMessageBox::warning(this, "Error",
-                             "El nombre de usuario debe tener entre 6 y 15 caracteres. "
-                             "Solo letras, dígitos, guiones y guiones bajos están permitidos.");
-        return;
-    }
-
-    // Contraseñas iguales
     if (pass1 != pass2) {
         QMessageBox::warning(this, "Error", "Las contraseñas no coinciden.");
         return;
     }
 
-    // Contraseña: 8..20, al menos una mayúscula, minúscula, dígito y caracter especial (!@#$%&*()-+=)
-    if (pass1.length() < 8 || pass1.length() > 20) {
-        QMessageBox::warning(this, "Error", "La contraseña debe tener entre 8 y 20 caracteres.");
-        return;
-    }
-    if (!QRegularExpression("[A-Z]").match(pass1).hasMatch()) {
-        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos una letra mayúscula.");
-        return;
-    }
-    if (!QRegularExpression("[a-z]").match(pass1).hasMatch()) {
-        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos una letra minúscula.");
-        return;
-    }
-    if (!QRegularExpression("[0-9]").match(pass1).hasMatch()) {
-        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos un dígito.");
-        return;
-    }
-    if (!QRegularExpression(R"([!@#$%&*\(\)\-+=])").match(pass1).hasMatch()) {
-        QMessageBox::warning(this, "Error", "La contraseña debe contener al menos un carácter especial (!@#$%&*()-+=).");
-        return;
-    }
-
-    // Email (formato)
-    QRegularExpression emailRegex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
-    if (!emailRegex.match(email).hasMatch()) {
-        QMessageBox::warning(this, "Error", "El correo electrónico no tiene un formato válido.");
-        return;
-    }
-
-    // Edad > 16 años
-    QDate today = QDate::currentDate();
-    int age = today.year() - birth.year();
-    if (today.month() < birth.month() || (today.month() == birth.month() && today.day() < birth.day())) {
-        age--;
-    }
-    if (age <= 16) {
-        QMessageBox::warning(this, "Error", "Debes tener más de 16 años para registrarte.");
-        return;
-    }
-
-    // Avatar elegido o por defecto
-    QImage avatarFinal;
-    if (selectedAvatar.isNull()) {
-        avatarFinal.load(":/icon/resources/icons/perfil.jpg");
-    } else {
-        avatarFinal = selectedAvatar;
-    }
-
-    // Verificar usuario/email no usados
     auto &nav = Navigation::instance();
-    const auto &usersMap = nav.users();
-
-    for (const User &u : usersMap) {
-        if (u.nickName().compare(nick, Qt::CaseInsensitive) == 0) {
-            QMessageBox::warning(this, "Error", "El nombre de usuario ya está en uso.");
-            return;
-        }
-        if (u.email().compare(email, Qt::CaseInsensitive) == 0) {
-            QMessageBox::warning(this, "Error", "El correo electrónico ya está registrado.");
+    for (const User &u : nav.users()) {
+        if (u.nickName().compare(nick, Qt::CaseInsensitive) == 0 ||
+            u.email().compare(email, Qt::CaseInsensitive) == 0) {
+            QMessageBox::warning(this, "Error", "Usuario o email ya registrado.");
             return;
         }
     }
 
-    // Crear y persistir usuario
     User newUser(
-        nick,         // nickName
-        email,        // email
-        pass1,        // password
-        avatarFinal,  // avatar
-        birth         // birthdate
-    );
+        nick,
+        email,
+        hashPassword(pass1),   // 🔐 HASH
+        selectedAvatar,
+        ui->date_birth->date()
+        );
 
-    try {
-        nav.dao().saveUser(newUser); // persistir
-        nav.addUser(newUser);        // agregar a memoria si procede
+    nav.dao().saveUser(newUser);
+    nav.addUser(newUser);
 
-        QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
-        emit signupSuccess(newUser);
-        close();
-    } catch (const std::exception &e) {
-        QMessageBox::critical(this, "Error", QString("No se pudo guardar el usuario: ") + QString::fromStdString(e.what()));
-    }
+    QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
+    emit signupSuccess(newUser);
+    close();
 }
 
 void signup::onCancel()
 {
     close();
 }
+
 void signup::on_btn_avatar_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(
-        this,
-        "Seleccionar avatar",
-        "",
-        "Imágenes (*.png *.jpg *.jpeg *.bmp)"
+    QString file = QFileDialog::getOpenFileName(
+        this, "Seleccionar avatar", "",
+        "Imágenes (*.png *.jpg *.jpeg)"
         );
 
-    if (!fileName.isEmpty()) {
-        selectedAvatar.load(fileName);
-
-        QPixmap roundedSelected = makeRoundedPixmapFromImage(selectedAvatar, 128);
-        ui->lblUserAvatar->setPixmap(roundedSelected);
-        ui->lblUserAvatar->setMask(QRegion(0, 0, 128, 128, QRegion::Ellipse));
+    if (!file.isEmpty()) {
+        selectedAvatar.load(file);
+        ui->lblUserAvatar->setPixmap(QPixmap::fromImage(selectedAvatar));
     }
+}
+
+void signup::onTogglePassword1(bool checked)
+{
+    ui->lineEdit_2->setEchoMode(
+        checked ? QLineEdit::Normal : QLineEdit::Password
+        );
+    ui->btnShowPass1->setIcon(
+        QIcon(checked ? ":icon/resources/icons/eye-open.png" : ":icon/resources/icons/eye-closed.svg")
+        );
+}
+
+void signup::onTogglePassword2(bool checked)
+{
+    ui->lineEdit_3->setEchoMode(
+        checked ? QLineEdit::Normal : QLineEdit::Password
+        );
+    ui->btnShowPass2->setIcon(
+        QIcon(checked ? ":icon/resources/icons/eye-open.png" : ":icon/resources/icons/eye-closed.svg")
+        );
 }

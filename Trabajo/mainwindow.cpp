@@ -38,51 +38,66 @@ MainWindow::MainWindow(QWidget *parent)
 
     // --- Herramientas ---
     ui->btnTexto->setIcon(QIcon(":/icon/resources/icons/texto.png"));
+    ui->btnTexto->setChecked(true);
     ui->btnTexto->setIconSize(iconSize);
 
     ui->btnColor->setIcon(QIcon(":icon/resources/icons/color.png"));
+    ui->btnColor->setChecked(true);
     ui->btnColor->setIconSize(iconSize);
 
     ui->btnArco->setIcon(QIcon(":icon/resources/icons/arco.png"));
+    ui->btnArco->setChecked(true);
     ui->btnArco->setIconSize(iconSize);
 
     ui->btnLinea->setIcon(QIcon(":icon/resources/icons/linea.png"));
+    ui->btnLinea->setChecked(true);
     ui->btnLinea->setIconSize(iconSize);
 
     ui->btnPunto->setIcon(QIcon(":icon/resources/icons/punto.png"));
+    ui->btnPunto->setChecked(true);
     ui->btnPunto->setIconSize(iconSize);
 
     // --- Configuración ---
     ui->btnLimpiar->setIcon(QIcon(":icon/resources/icons/limpiar.png"));
+    ui->btnLimpiar->setChecked(true);
     ui->btnLimpiar->setIconSize(iconSize);
 
     ui->btnBorrar->setIcon(QIcon(":icon/resources/icons/borrar.png"));
+    ui->btnBorrar->setChecked(true);
     ui->btnBorrar->setIconSize(iconSize);
 
     ui->btnMover->setIcon(QIcon(":icon/resources/icons/mover.png"));
+    ui->btnMover->setChecked(true);
     ui->btnMover->setIconSize(iconSize);
 
     ui->btnZoomIn->setIcon(QIcon(":icon/resources/icons/zoom_in.png"));
+    ui->btnZoomIn->setChecked(true);
     ui->btnZoomIn->setIconSize(iconSize);
 
     ui->btnZoomOut->setIcon(QIcon(":icon/resources/icons/zoom_out.png"));
+    ui->btnZoomOut->setChecked(true);
     ui->btnZoomOut->setIconSize(iconSize);
 
     // --- Herramientas especiales ---
     ui->btnRegla->setIcon(QIcon(":icon/resources/icons/regla.png"));
+    ui->btnRegla->setChecked(true);
     ui->btnRegla->setIconSize(iconSize);
 
     ui->btnTransportador->setIcon(QIcon(":icon/resources/icons/transportador.png"));
+    ui->btnTransportador->setChecked(true);
     ui->btnTransportador->setIconSize(iconSize);
 
     ui->btnCompas->setIcon(QIcon(":icon/resources/icons/compas.png"));
+    ui->btnCompas->setChecked(true);
     ui->btnCompas->setIconSize(iconSize);
 
     // --- Botones de volver ---
     ui->btnBack1->setIcon(QIcon(":icon/resources/icons/back.png"));
+    ui->btnBack1->setChecked(true);
     ui->btnBack1->setIconSize(iconSize);
 
     ui->btnBack2->setIcon(QIcon(":icon/resources/icons/back.png"));
+    ui->btnBack2->setChecked(true);
     ui->btnBack2->setIconSize(iconSize);
 
     // === Insertar el QGraphicsView dentro del mapwidget ===

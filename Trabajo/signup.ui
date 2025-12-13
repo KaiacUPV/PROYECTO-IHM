@@ -47,22 +47,22 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="9" column="3">
-     <widget class="QPushButton" name="Cancel_Button">
+    <item row="8" column="0">
+     <widget class="QLineEdit" name="lineEdit_2">
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <stylestrategy>PreferDefault</stylestrategy>
        </font>
       </property>
-      <property name="text">
-       <string>Cancel</string>
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::Password</enum>
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="leEmail">
+    <item row="5" column="0" colspan="4">
+     <widget class="QLabel" name="Password_Label">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -73,11 +73,37 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
        </font>
       </property>
       <property name="text">
-       <string>Email</string>
+       <string>Password  (8 y 20 caracteres)</string>
       </property>
      </widget>
     </item>
-    <item row="7" column="0">
+    <item row="10" column="2">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="2" column="2">
+     <widget class="QDateEdit" name="date_birth"/>
+    </item>
+    <item row="10" column="0">
+     <widget class="QLineEdit" name="lineEdit_3">
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::Password</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="3">
+     <widget class="QLineEdit" name="Text_Email"/>
+    </item>
+    <item row="9" column="0">
      <widget class="QLabel" name="Repeat_Label">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -95,38 +121,19 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLineEdit" name="txt_nick"/>
-    </item>
-    <item row="6" column="0">
-     <widget class="QLineEdit" name="lineEdit_2">
+    <item row="11" column="4">
+     <widget class="QPushButton" name="Cancel_Button">
       <property name="font">
        <font>
-        <stylestrategy>PreferDefault</stylestrategy>
+        <pointsize>12</pointsize>
        </font>
       </property>
-      <property name="echoMode">
-       <enum>QLineEdit::EchoMode::PasswordEchoOnEdit</enum>
+      <property name="text">
+       <string>Cancel</string>
       </property>
      </widget>
     </item>
-    <item row="8" column="1">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Orientation::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="4" column="0" colspan="2">
-     <widget class="QLineEdit" name="Text_Email"/>
-    </item>
-    <item row="9" column="2">
+    <item row="11" column="3">
      <widget class="QPushButton" name="Accept_Button">
       <property name="font">
        <font>
@@ -138,7 +145,39 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="4">
+    <item row="10" column="1">
+     <widget class="QToolButton" name="btnShowPass2">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="lebirth">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Date of Birth</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QToolButton" name="btnShowPass1">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="5">
      <widget class="QGroupBox" name="groupUsuario">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -203,10 +242,10 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
       </layout>
      </widget>
     </item>
-    <item row="5" column="0" colspan="3">
-     <widget class="QLabel" name="Password_Label">
+    <item row="3" column="0">
+     <widget class="QLabel" name="leEmail">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -217,14 +256,7 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
        </font>
       </property>
       <property name="text">
-       <string>Password  (8 y 20 caracteres)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
-     <widget class="QLineEdit" name="lineEdit_3">
-      <property name="echoMode">
-       <enum>QLineEdit::EchoMode::PasswordEchoOnEdit</enum>
+       <string>Email</string>
       </property>
      </widget>
     </item>
@@ -246,26 +278,8 @@ en mayúsculas y minúsculas, así como algún dígito y algún carácter especi
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QDateEdit" name="date_birth"/>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="lebirth">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Date of Birth</string>
-      </property>
-     </widget>
+    <item row="2" column="0">
+     <widget class="QLineEdit" name="txt_nick"/>
     </item>
    </layout>
   </widget>
