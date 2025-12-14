@@ -63,7 +63,6 @@ private slots:
     void onTexto();
     void onPunto();
     void onLinea();
-    void onArco();
     void onColor();
     void onMover();
     void onZoomIn();
@@ -123,7 +122,6 @@ private:
         TOOL_TEXTO,
         TOOL_PUNTO,
         TOOL_LINEA,
-        TOOL_ARCO,
         TOOL_COLOR,
         TOOL_MOVER,
         TOOL_BORRAR,
@@ -134,13 +132,13 @@ private:
     int currentTool = TOOL_NONE;
     
     void updateToolSelection(int tool);
-    int arcStep = 0;
-    QPointF arcA, arcB;
-    void clearArcPreview();
-    QGraphicsPathItem *tempArc = nullptr;
-    QGraphicsEllipseItem *arcMarkerCenter = nullptr;
-    QGraphicsEllipseItem *arcMarkerStart = nullptr;
-    QGraphicsEllipseItem *arcMarkerEnd = nullptr;
+    int compassStep = 0;
+    QPointF compassA, compassB;
+    void clearCompassPreview();
+    QGraphicsPathItem *tempCompassArc = nullptr;
+    QGraphicsEllipseItem *compassMarkerCenter = nullptr;
+    QGraphicsEllipseItem *compassMarkerStart = nullptr;
+    QGraphicsEllipseItem *compassMarkerEnd = nullptr;
 
     // Problems
     Problem m_currentProblem;
