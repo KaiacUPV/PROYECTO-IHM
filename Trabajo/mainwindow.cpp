@@ -166,9 +166,9 @@ MainWindow::MainWindow(QWidget *parent)
     const QString qss = R"(
         QMainWindow { background-color: #F3F6F8; font-family: 'Segoe UI', Arial, sans-serif; }
         QGroupBox { background-color: #FFFFFF; border: 1px solid #E0E6ED; border-radius: 8px; padding: 8px; }
-        QToolButton { background: transparent; border-radius: 4px; padding: 2px; }
-        QToolButton:hover { background-color: rgba(0,0,0,0.05); }
-        QToolButton:checked { background-color: rgba(25,118,210,0.12); border: 1px solid rgba(25,118,210,0.2); }
+        QToolButton { background: transparent; border-radius: 4px; padding: 2px; border: 2px solid transparent; }
+        QToolButton:hover { background-color: rgba(0,0,0,0.05); border: 2px solid rgba(25,118,210,0.15); }
+        QToolButton:checked { background-color: rgba(25,118,210,0.2); border: 2px solid #1976D2; color: #1976D2; font-weight: bold; }
         QPushButton { background-color: #1976D2; color: white; padding: 6px 12px; border-radius: 6px; }
         QPushButton:hover { background-color: #155fa0; }
         QPushButton#btnguardar { background-color: #2E7D32; }
@@ -829,15 +829,16 @@ void MainWindow::onProblemas()
 //     HERRAMIENTAS
 // ==========================================================
 
-void MainWindow::onTexto()  { currentTool = TOOL_TEXTO; }
-void MainWindow::onPunto()  { currentTool = TOOL_PUNTO; }
-void MainWindow::onLinea()  { currentTool = TOOL_LINEA; }
-void MainWindow::onArco()   { currentTool = TOOL_ARCO; arcStep = 0; }
+void MainWindow::onTexto()  { currentTool = TOOL_TEXTO; updateToolSelection(TOOL_TEXTO); }
+void MainWindow::onPunto()  { currentTool = TOOL_PUNTO; updateToolSelection(TOOL_PUNTO); }
+void MainWindow::onLinea()  { currentTool = TOOL_LINEA; updateToolSelection(TOOL_LINEA); }
+void MainWindow::onArco()   { currentTool = TOOL_ARCO; arcStep = 0; updateToolSelection(TOOL_ARCO); }
 
 void MainWindow::onColor()
 {
     activeColor = QColorDialog::getColor(Qt::red, this);
     currentTool = TOOL_COLOR;
+    updateToolSelection(TOOL_COLOR);
 
     bool ok1;
     int w = QInputDialog::getInt(this, "Grosor de línea",
@@ -857,10 +858,10 @@ void MainWindow::onColor()
                              "Color, grosor y tamaño de texto configurados.");
 }
 
-void MainWindow::onMover()  { currentTool = TOOL_MOVER; }
+void MainWindow::onMover()  { currentTool = TOOL_MOVER; updateToolSelection(TOOL_MOVER); }
 void MainWindow::onZoomIn()   { zoomLevel += 0.1; view->scale(1.1, 1.1); }
 void MainWindow::onZoomOut()  { zoomLevel -= 0.1; view->scale(0.9, 0.9); }
-void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; }
+void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; updateToolSelection(TOOL_BORRAR); }
 
 void MainWindow::onLimpiar()
 {
@@ -889,7 +890,8 @@ void MainWindow::onRegla()
         regla->setPlaced(true);
         statusBar()->showMessage("Regla colocada: Mantén Ctrl y arrastra para moverla", 5000);
     }
-    ui->btnRegla->setChecked(regla->isPlaced());
+    currentTool = TOOL_REGLA;
+    updateToolSelection(TOOL_REGLA);
 }
 
 void MainWindow::onCompas()
@@ -903,7 +905,8 @@ void MainWindow::onCompas()
     clearArcPreview();
     if (compas->isPlaced()) { compas->setPlaced(false); statusBar()->showMessage("Compás desbloqueado: arrastra para mover", 4000); }
     else { centerToolOnView(compas); compas->setPlaced(true); statusBar()->showMessage("Compás colocado: Mantén Ctrl y arrastra para moverlo", 4000); }
-    ui->btnCompas->setChecked(compas->isPlaced());
+    currentTool = TOOL_COMPAS;
+    updateToolSelection(TOOL_COMPAS);
 }
 
 void MainWindow::onTransportador()
@@ -917,7 +920,8 @@ void MainWindow::onTransportador()
     clearArcPreview();
     if (transportador->isPlaced()) { transportador->setPlaced(false); statusBar()->showMessage("Transportador desbloqueado: arrastra para mover", 4000); }
     else { centerToolOnView(transportador); transportador->setPlaced(true); statusBar()->showMessage("Transportador colocado: Mantén Ctrl y arrastra para moverlo", 4000); }
-    ui->btnTransportador->setChecked(transportador->isPlaced());
+    currentTool = TOOL_TRANSPORTADOR;
+    updateToolSelection(TOOL_TRANSPORTADOR);
 }
 
 void MainWindow::centerToolOnView(Tool *tool)
@@ -932,6 +936,57 @@ void MainWindow::centerToolOnView(Tool *tool)
         );
 
     tool->setPos(centerPos);
+}
+
+void MainWindow::updateToolSelection(int tool)
+{
+    // Desmarcar todos los botones de herramientas
+    ui->btnTexto->setChecked(false);
+    ui->btnPunto->setChecked(false);
+    ui->btnLinea->setChecked(false);
+    ui->btnArco->setChecked(false);
+    ui->btnColor->setChecked(false);
+    ui->btnMover->setChecked(false);
+    ui->btnBorrar->setChecked(false);
+    ui->btnRegla->setChecked(false);
+    ui->btnCompas->setChecked(false);
+    ui->btnTransportador->setChecked(false);
+    
+    // Marcar el botón correspondiente a la herramienta seleccionada
+    switch(tool) {
+        case TOOL_TEXTO:
+            ui->btnTexto->setChecked(true);
+            break;
+        case TOOL_PUNTO:
+            ui->btnPunto->setChecked(true);
+            break;
+        case TOOL_LINEA:
+            ui->btnLinea->setChecked(true);
+            break;
+        case TOOL_ARCO:
+            ui->btnArco->setChecked(true);
+            break;
+        case TOOL_COLOR:
+            ui->btnColor->setChecked(true);
+            break;
+        case TOOL_MOVER:
+            ui->btnMover->setChecked(true);
+            break;
+        case TOOL_BORRAR:
+            ui->btnBorrar->setChecked(true);
+            break;
+        case TOOL_REGLA:
+            ui->btnRegla->setChecked(true);
+            break;
+        case TOOL_COMPAS:
+            ui->btnCompas->setChecked(true);
+            break;
+        case TOOL_TRANSPORTADOR:
+            ui->btnTransportador->setChecked(true);
+            break;
+        default:
+            break;
+    }
 }
 
 // ==========================================================

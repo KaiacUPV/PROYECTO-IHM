@@ -125,9 +125,14 @@ private:
         TOOL_ARCO,
         TOOL_COLOR,
         TOOL_MOVER,
-        TOOL_BORRAR
+        TOOL_BORRAR,
+        TOOL_REGLA,
+        TOOL_COMPAS,
+        TOOL_TRANSPORTADOR
     };
     int currentTool = TOOL_NONE;
+    
+    void updateToolSelection(int tool);
     int arcStep = 0;
     QPointF arcA, arcB;
     void clearArcPreview();
