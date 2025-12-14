@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QCryptographicHash>
+#include <QPainter>
+#include <QPainterPath>
 #include <QRegularExpression>
 #include <QDate>
 
@@ -13,6 +15,39 @@ static QString hashPassword(const QString &password)
                password.toUtf8(),
                QCryptographicHash::Sha256
                ).toHex();
+}
+void signup::setCircularLabel(QLabel *label, const QPixmap &pixmap, int diameter)
+{
+    if (!label) return;
+    label->setFixedSize(diameter, diameter);
+    label->setPixmap(pixmap);
+    label->setScaledContents(true);
+    label->setMask(QRegion(0, 0, diameter, diameter, QRegion::Ellipse));
+}
+QPixmap signup::makeRoundedPixmap(const QPixmap &src, int diameter)
+{
+    if (src.isNull()) return QPixmap();
+
+    QPixmap scaled = src.scaled(
+        diameter,
+        diameter,
+        Qt::KeepAspectRatioByExpanding,
+        Qt::SmoothTransformation
+        );
+
+    QPixmap rounded(diameter, diameter);
+    rounded.fill(Qt::transparent);
+
+    QPainter painter(&rounded);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+
+    QPainterPath path;
+    path.addEllipse(0, 0, diameter, diameter);
+    painter.setClipPath(path);
+
+    painter.drawPixmap(0, 0, scaled);
+
+    return rounded;
 }
 
 signup::signup(QWidget *parent)
@@ -84,6 +119,12 @@ void signup::onAccept()
         finalAvatar = selectedAvatar;
     }
 
+    QPixmap pixmap = QPixmap::fromImage(finalAvatar);
+    QPixmap rounded = makeRoundedPixmap(pixmap, 128);
+
+    setCircularLabel(ui->lblUserAvatar, rounded, 128);
+
+
     User newUser(
         nick,
         email,
@@ -108,15 +149,22 @@ void signup::onCancel()
 void signup::on_btn_avatar_clicked()
 {
     QString file = QFileDialog::getOpenFileName(
-        this, "Seleccionar avatar", "",
+        this,
+        "Seleccionar avatar",
+        "",
         "Imágenes (*.png *.jpg *.jpeg)"
         );
 
     if (!file.isEmpty()) {
         selectedAvatar.load(file);
-        ui->lblUserAvatar->setPixmap(QPixmap::fromImage(selectedAvatar));
+
+        QPixmap pixmap = QPixmap::fromImage(selectedAvatar);
+        QPixmap rounded = makeRoundedPixmap(pixmap, 128);
+
+        setCircularLabel(ui->lblUserAvatar, rounded, 128);
     }
 }
+
 
 void signup::onTogglePassword1(bool checked)
 {

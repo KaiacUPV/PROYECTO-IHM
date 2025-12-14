@@ -28,6 +28,7 @@ login::login(QWidget *parent)
     ui->btnShowPassword->setCheckable(true);
     ui->btnShowPassword->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
 
+
     setWindowTitle("Carta Náutica - Iniciar Sesión");
 }
 

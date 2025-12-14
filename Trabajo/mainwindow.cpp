@@ -893,7 +893,7 @@ void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; updateToolSelection(TOO
 void MainWindow::onLimpiar()
 {
     loadCarta();
-    clearCompassPreview();
+    clearArcPreview();
 }
 
 void MainWindow::onRegla()
@@ -905,7 +905,7 @@ void MainWindow::onRegla()
     }
 
     // Toggle placement on repeated clicks: if already placed, unplace for repositioning
-    clearCompassPreview();
+    clearArcPreview();
     if (regla->isPlaced())
     {
         regla->setPlaced(false);
@@ -924,10 +924,10 @@ void MainWindow::onRegla()
 void MainWindow::onCompas()
 {
     currentTool = TOOL_COMPAS;
-    compassStep = 0;
-    clearCompassPreview();
+    arcStep = 0;
     updateToolSelection(TOOL_COMPAS);
-    statusBar()->showMessage("Compás (Arco): Haz clic en el centro del arco", 3000);
+    clearArcPreview();
+
 }
 
 void MainWindow::onTransportador()
@@ -938,7 +938,7 @@ void MainWindow::onTransportador()
         scene->addItem(transportador);
     }
 
-    clearCompassPreview();
+    clearArcPreview();
     if (transportador->isPlaced()) { transportador->setPlaced(false); statusBar()->showMessage("Transportador desbloqueado: arrastra para mover", 4000); }
     else { centerToolOnView(transportador); transportador->setPlaced(true); statusBar()->showMessage("Transportador colocado: Mantén Ctrl y arrastra para moverlo", 4000); }
     currentTool = TOOL_TRANSPORTADOR;
@@ -1022,7 +1022,7 @@ void MainWindow::applyZoom(double factor)
 {
     double newZoom = zoomLevel * factor;
 
-    const double minZoom = 0.1;
+    const double minZoom = 1.0;
     const double maxZoom = 4.0;
 
     if (newZoom < minZoom) {
@@ -1096,7 +1096,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             // CLICK DERECHO → MOVER MAPA
             if (e->button() == Qt::RightButton)
             {
-                clearCompassPreview();
+                clearArcPreview();
                 view->setDragMode(QGraphicsView::ScrollHandDrag);
 
                 QMouseEvent fakePress(
@@ -1172,65 +1172,52 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 // ======================================================
                 if (currentTool == TOOL_COMPAS)
                 {
-                    if (compassStep == 0) {
-                        compassA = p; compassStep = 1;
+                    if (arcStep == 0) {
+                        arcA = p; arcStep = 1;
                         // Create center marker
-                        if (!compassMarkerCenter) {
-                            compassMarkerCenter = scene->addEllipse(compassA.x()-3, compassA.y()-3, 6, 6, QPen(Qt::darkGreen), QBrush(Qt::darkGreen));
+                        if (!arcMarkerCenter) {
+                            arcMarkerCenter = scene->addEllipse(arcA.x()-3, arcA.y()-3, 6, 6, QPen(Qt::darkGreen), QBrush(Qt::darkGreen));
                             statusBar()->showMessage("Centro del arco fijado", 2500);
                         } else {
-                            compassMarkerCenter->setRect(compassA.x()-3, compassA.y()-3, 6, 6);
+                            arcMarkerCenter->setRect(arcA.x()-3, arcA.y()-3, 6, 6);
                         }
-                        statusBar()->showMessage("Punto radio; mueve el ratón y haz clic para finalizar el arco", 4000);
+                        statusBar()->showMessage("Punto inicio fijado; mueve el ratón y haz clic para finalizar el arco", 4000);
                     }
-                    else if (compassStep == 1) {
-                        compassB = p; compassStep = 2;
-                        // Create radius point marker
-                        if (!compassMarkerStart)
-                            compassMarkerStart = scene->addEllipse(compassB.x()-3, compassB.y()-3, 6, 6, QPen(Qt::NoPen), QBrush(Qt::blue));
+                    else if (arcStep == 1) {
+                        arcB = p; arcStep = 2;
+                        // Create start marker
+                        if (!arcMarkerStart)
+                            arcMarkerStart = scene->addEllipse(arcB.x()-3, arcB.y()-3, 6, 6, QPen(Qt::NoPen), QBrush(Qt::blue));
                         else
-                            compassMarkerStart->setRect(compassB.x()-3, compassB.y()-3, 6, 6);
-                        
-                        // Crear preview inicial del arco (arco pequeño como indicador)
-                        double r = QLineF(compassA, compassB).length();
-                        if (r >= 5) {
-                            QRectF rect(compassA.x()-r, compassA.y()-r, 2*r, 2*r);
-                            QPainterPath path;
-                            double startAngle = QLineF(compassA, compassB).angle();
-                            path.arcMoveTo(rect, startAngle);
-                            path.arcTo(rect, startAngle, 30); // Preview inicial de 30 grados
-
-                            if (!tempCompassArc) {
-                                QPen previewPen(activeColor, activeWidth);
-                                previewPen.setStyle(Qt::DashLine);
-                                tempCompassArc = scene->addPath(path, previewPen);
-                            } else {
-                                tempCompassArc->setPath(path);
-                            }
+                            arcMarkerStart->setRect(arcB.x()-3, arcB.y()-3, 6, 6);
+                        // Prepare preview arc with radius from arcA to arcB
+                        double r = QLineF(arcA, arcB).length();
+                        QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
+                        QPainterPath path;
+                        double startAngle = QLineF(arcA, arcB).angle();
+                        path.arcMoveTo(rect, startAngle);
+                        // initialize with zero span
+                        if (!tempArc) {
+                            QPen previewPen(activeColor, activeWidth);
+                            previewPen.setStyle(Qt::DashLine);
+                            tempArc = scene->addPath(path, previewPen);
+                        } else {
+                            tempArc->setPath(path);
                         }
-                        qDebug() << "Second click: compassStep now = 2, compassA =" << compassA << "compassB =" << compassB;
                     }
                     else
                     {
-                        QPointF compassC = p;
-                        double r = QLineF(compassA, compassB).length();
+                        QPointF arcC = p;
+                        double r = QLineF(arcA, arcB).length();
 
                         if (r >= 5)
                         {
-                            double startAngle = QLineF(compassA, compassB).angle();
-                            double endAngle   = QLineF(compassA, compassC).angle();
+                            double startAngle = QLineF(arcA, arcB).angle();
+                            double endAngle   = QLineF(arcA, arcC).angle();
+                            double span = endAngle - startAngle;
+                            if (span < 0) span += 360;
 
-                            // Calcular la dirección del arco (como un compás físico)
-                            double angleFromStart = endAngle - startAngle;
-
-                            // Normalizar el ángulo entre -180 y 180 grados
-                            while (angleFromStart > 180) angleFromStart -= 360;
-                            while (angleFromStart < -180) angleFromStart += 360;
-
-                            // Usar el ángulo calculado (puede ser negativo para sentido horario)
-                            double span = angleFromStart;
-
-                            QRectF rect(compassA.x()-r, compassA.y()-r, 2*r, 2*r);
+                            QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
                             QPainterPath path;
                             path.arcMoveTo(rect, startAngle);
                             path.arcTo(rect, startAngle, span);
@@ -1239,8 +1226,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                             statusBar()->showMessage("Arco añadido", 2500);
                         }
 
-                        compassStep = 0;
-                        clearCompassPreview();
+                        arcStep = 0;
+                        clearArcPreview();
                     }
                     return true;
                 }
@@ -1283,60 +1270,64 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         // ============================================================
         //                PREVIEW DINÁMICO PARA ARCO (mientras se dibuja)
         // ============================================================
-        if (event->type() == QEvent::MouseMove && currentTool == TOOL_COMPAS && compassStep == 2)
+        if (event->type() == QEvent::MouseMove && currentTool == TOOL_COMPAS)
         {
             QMouseEvent *e = static_cast<QMouseEvent*>(event);
             QPointF p = view->mapToScene(e->pos());
 
-            // Calcular el radio desde el centro hasta el segundo punto
-            double r = QLineF(compassA, compassB).length();
+            // ─────────────────────────────
+            // Paso 1 → solo centro fijado
+            // ─────────────────────────────
+            if (arcStep == 1)
+            {
+                double r = QLineF(arcA, p).length();
+                if (r < 5) return true;
 
-            if (r >= 5) {
-                // Ángulo inicial (desde centro hasta punto de radio - punto de inicio del arco)
-                double startAngle = QLineF(compassA, compassB).angle();
-                // Ángulo final (desde centro hasta posición actual del ratón - punto final del arco)
-                double endAngle = QLineF(compassA, p).angle();
+                QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
+                QPainterPath path;
+                path.addEllipse(rect);
 
-                // Calcular la diferencia angular
-                double span = endAngle - startAngle;
-
-                // Normalizar para el rango -180 a 180
-                while (span > 180) span -= 360;
-                while (span < -180) span += 360;
-
-                // Si el arco es muy pequeño, mostrar un mínimo visible
-                if (qAbs(span) < 15) {
-                    span = (span >= 0) ? 15 : -15;
+                if (!tempArc) {
+                    QPen previewPen(activeColor, activeWidth);
+                    previewPen.setStyle(Qt::DashLine);
+                    tempArc = scene->addPath(path, previewPen);
+                } else {
+                    tempArc->setPath(path);
                 }
 
-                // Crear el rectángulo para el arco
-                QRectF rect(compassA.x()-r, compassA.y()-r, 2*r, 2*r);
+                return true;
+            }
+
+            // ─────────────────────────────
+            // Paso 2 → arco dinámico
+            // ─────────────────────────────
+            if (arcStep == 2)
+            {
+                double r = QLineF(arcA, arcB).length();
+                if (r < 5) return true;
+
+                double startAngle = QLineF(arcA, arcB).angle();
+                double endAngle   = QLineF(arcA, p).angle();
+                double span = endAngle - startAngle;
+                if (span < 0) span += 360;
+
+                QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
                 QPainterPath path;
                 path.arcMoveTo(rect, startAngle);
                 path.arcTo(rect, startAngle, span);
 
-                // Crear o actualizar el preview del arco punteado
-                if (!tempCompassArc) {
+                if (!tempArc) {
                     QPen previewPen(activeColor, activeWidth);
                     previewPen.setStyle(Qt::DashLine);
-                    tempCompassArc = scene->addPath(path, previewPen);
+                    tempArc = scene->addPath(path, previewPen);
                 } else {
-                    tempCompassArc->setPath(path);
+                    tempArc->setPath(path);
                 }
 
-                // Mostrar marcador en la posición final del arco (donde terminaría)
-                double endMarkerAngle = qDegreesToRadians(endAngle);
-                QPointF endMarker(compassA.x() + r * qCos(endMarkerAngle),
-                                  compassA.y() - r * qSin(endMarkerAngle));
-
-                if (!compassMarkerEnd) {
-                    compassMarkerEnd = scene->addEllipse(endMarker.x()-3, endMarker.y()-3, 6, 6,
-                                                        QPen(Qt::NoPen), QBrush(Qt::red));
-                } else {
-                    compassMarkerEnd->setRect(endMarker.x()-3, endMarker.y()-3, 6, 6);
-                }
+                return true;
             }
         }
+
 
         if (event->type() == QEvent::MouseButtonRelease && drawingLine)
         {
@@ -1398,15 +1389,15 @@ void MainWindow::onTogglePassword(bool checked)
         );
 }
 
-void MainWindow::clearCompassPreview()
+void MainWindow::clearArcPreview()
 {
-    if (tempCompassArc) {
-        scene->removeItem(tempCompassArc);
-        delete tempCompassArc; tempCompassArc = nullptr;
+    if (tempArc) {
+        scene->removeItem(tempArc);
+        delete tempArc; tempArc = nullptr;
     }
-    if (compassMarkerCenter) { scene->removeItem(compassMarkerCenter); delete compassMarkerCenter; compassMarkerCenter = nullptr; }
-    if (compassMarkerStart) { scene->removeItem(compassMarkerStart); delete compassMarkerStart; compassMarkerStart = nullptr; }
-    if (compassMarkerEnd) { scene->removeItem(compassMarkerEnd); delete compassMarkerEnd; compassMarkerEnd = nullptr; }
+    if (arcMarkerCenter) { scene->removeItem(arcMarkerCenter); delete arcMarkerCenter; arcMarkerCenter = nullptr; }
+    if (arcMarkerStart) { scene->removeItem(arcMarkerStart); delete arcMarkerStart; arcMarkerStart = nullptr; }
+    if (arcMarkerEnd) { scene->removeItem(arcMarkerEnd); delete arcMarkerEnd; arcMarkerEnd = nullptr; }
 }
 
 void MainWindow::onAnswerSelected()

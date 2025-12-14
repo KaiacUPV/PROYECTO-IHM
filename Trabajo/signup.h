@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QImage>
+#include <QLabel>
 #include "navigation.h"
 
 namespace Ui {
@@ -30,6 +31,8 @@ private slots:
 private:
     Ui::signup *ui;
     QImage selectedAvatar;
+    void setCircularLabel(QLabel *label, const QPixmap &pixmap, int diameter);
+    QPixmap makeRoundedPixmap(const QPixmap &src, int diameter);
 };
 
 #endif // SIGNUP_H
