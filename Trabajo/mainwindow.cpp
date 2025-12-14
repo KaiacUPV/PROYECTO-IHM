@@ -19,6 +19,7 @@
 #include <random>
 #include <QFileDialog>
 #include <QRegularExpression>
+#include <QCryptographicHash>
 
 #include "login.h"
 #include "signup.h"
@@ -124,13 +125,30 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Conexiones panel usuario/problemas
     connect(ui->Boton_Usuario, &QPushButton::clicked, this, &MainWindow::onPerfil);
+    ui->Boton_Usuario->setChecked(true);
+
     connect(ui->btnProblemas,  &QToolButton::clicked, this, &MainWindow::onProblemas);
+    ui->btnProblemas->setChecked(true);
+
 
     // Conexiones perfil (page_usuario)
     connect(ui->Btn_Avatar, &QPushButton::clicked, this, &MainWindow::onEditAvatar);
+    ui->Btn_Avatar->setChecked(true);
+
     connect(ui->btnguardar, &QPushButton::clicked, this, &MainWindow::onSaveProfile);
+    ui->btnguardar->setChecked(true);
+
     connect(ui->pushButton_2, &QPushButton::clicked, this, &MainWindow::onCancelProfile);
+    ui->pushButton_2->setChecked(true);
+
     connect(ui->btnBack1, &QToolButton::clicked, this, &MainWindow::back);
+
+    connect(ui->btnShowPassword, &QToolButton::toggled,
+            this, &MainWindow::onTogglePassword);
+
+    ui->line_contra->setEchoMode(QLineEdit::Password);
+    ui->btnShowPassword->setCheckable(true);
+    ui->btnShowPassword->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
 
     // Logout button (page_usuario)
     connect(ui->btnlogin_2, &QPushButton::clicked, this, &MainWindow::onLogout);
@@ -294,28 +312,34 @@ void MainWindow::loadProfileUI()
     if (m_isLogged) {
         ui->lblUsuario->setText(m_loggedUser.nickName());
         ui->line_email->setText(m_loggedUser.email());
-        ui->line_contra->setText(m_loggedUser.password());
+
+        // Nunca mostrar contraseña
+        ui->line_contra->clear();
+        ui->line_contra->setPlaceholderText("Introduce nueva contraseña");
+        ui->line_contra->setEchoMode(QLineEdit::Password);
+
         ui->dateUser->setDate(m_loggedUser.birthdate());
 
         QPixmap pixmap = QPixmap::fromImage(m_loggedUser.avatar());
-        setCircularLabel(ui->lblUserAvatar_2, makeRoundedPixmap(pixmap, 80), 80);
+        setCircularLabel(ui->lblUserAvatar_2,
+                         makeRoundedPixmap(pixmap, 80), 80);
 
-        // Mostrar contraseña cuando hay sesión iniciada
-        ui->line_contra->setEchoMode(QLineEdit::Normal);
-
-        currentAvatarPath = "";  // Usar avatar actual del usuario
+        currentAvatarPath = "";
     } else {
         ui->lblUsuario->setText("Sin Usuario");
-        ui->line_email->setText("");
-        ui->line_contra->setText("");
+        ui->line_email->clear();
+        ui->line_contra->clear();
         ui->dateUser->setDate(QDate::currentDate());
-        ui->lblUserAvatar_2->setPixmap(makeRoundedPixmap(QPixmap(":/icon/resources/icons/perfil.jpg"), 80));
-        currentAvatarPath = "";
 
-        // Enmascarar contraseña cuando no haya sesión
+        ui->lblUserAvatar_2->setPixmap(
+            makeRoundedPixmap(QPixmap(":/icon/resources/icons/perfil.jpg"), 80)
+            );
+
         ui->line_contra->setEchoMode(QLineEdit::Password);
+        currentAvatarPath = "";
     }
 }
+
 
 void MainWindow::onEditAvatar()
 {
@@ -369,6 +393,14 @@ bool MainWindow::validatePassword(const QString &password)
     }
     return true;
 }
+static QString hashPassword(const QString &password)
+{
+    return QCryptographicHash::hash(
+               password.toUtf8(),
+               QCryptographicHash::Sha256
+               ).toHex();
+}
+
 
 void MainWindow::onSaveProfile()
 {
@@ -379,7 +411,7 @@ void MainWindow::onSaveProfile()
 
     // Validar campos
     QString email = ui->line_email->text().trimmed();
-    QString password = ui->line_contra->text();
+    QString newPassword = ui->line_contra->text();   // NUEVA contraseña (opcional)
     QDate birthDate = ui->dateUser->date();
 
     // Validar email
@@ -388,17 +420,19 @@ void MainWindow::onSaveProfile()
         return;
     }
     if (!validateEmail(email)) {
-        QMessageBox::warning(this, "Error", "El correo electrónico no es válido.\nFormato: usuario@dominio.com");
+        QMessageBox::warning(this, "Error",
+                             "El correo electrónico no es válido.\nFormato: usuario@dominio.com");
         return;
     }
 
-    // Validar contraseña
-    if (password.isEmpty()) {
-        QMessageBox::warning(this, "Error", "La contraseña no puede estar vacía.");
-        return;
-    }
-    if (!validatePassword(password)) {
-        return;
+    // 🔐 Validar contraseña SOLO si se quiere cambiar
+    QString finalPasswordHash = m_loggedUser.password(); // por defecto, la actual
+
+    if (!newPassword.isEmpty()) {
+        if (!validatePassword(newPassword)) {
+            return;
+        }
+        finalPasswordHash = hashPassword(newPassword);
     }
 
     // Validar fecha de nacimiento
@@ -407,23 +441,23 @@ void MainWindow::onSaveProfile()
         return;
     }
 
-    // Edad mínima (opcional, ajusta según requisitos)
     int age = QDate::currentDate().year() - birthDate.year();
     if (age < 13) {
-        QMessageBox::warning(this, "Error", "Debes tener al menos 13 años para usar este servicio.");
+        QMessageBox::warning(this, "Error",
+                             "Debes tener al menos 13 años para usar este servicio.");
         return;
     }
 
-    // Cargar nueva imagen de avatar si se seleccionó una
+    // Avatar
     QImage newAvatar;
     if (!currentAvatarPath.isEmpty()) {
         newAvatar.load(currentAvatarPath);
         if (newAvatar.isNull()) {
-            QMessageBox::warning(this, "Error", "No se pudo cargar la imagen del avatar.");
+            QMessageBox::warning(this, "Error",
+                                 "No se pudo cargar la imagen del avatar.");
             return;
         }
     } else {
-        // Usar avatar actual
         newAvatar = m_loggedUser.avatar();
     }
 
@@ -433,34 +467,35 @@ void MainWindow::onSaveProfile()
     try {
         auto &nav = Navigation::instance();
 
-        // Crear usuario actualizado (orden correcto de argumentos)
         User updatedUser(
             m_loggedUser.nickName(),  // nickName (no modificable)
             email,                    // email
-            password,                 // password
+            finalPasswordHash,        // hash (nuevo o anterior)
             newAvatar,                // avatar
             birthDate                 // birthdate
             );
 
         // Actualizar en memoria
         m_loggedUser = updatedUser;
-
-        // Actualizar en memoria
         nav.updateUser(updatedUser);
-        // Persistir cambio en la base de datos
         nav.dao().updateUser(updatedUser);
 
-        QMessageBox::information(this, "Éxito", "Perfil actualizado correctamente.");
+        QMessageBox::information(this, "Éxito",
+                                 "Perfil actualizado correctamente.");
 
-        // Recargar UI
+        // Limpiar campo contraseña (buena práctica)
+        ui->line_contra->clear();
+
         loadProfileUI();
         updateUserAvatar();
 
     } catch (const std::exception &e) {
         QMessageBox::critical(this, "Error",
-                              QString("No se pudo guardar el perfil: ") + QString::fromStdString(e.what()));
+                              QString("No se pudo guardar el perfil: ")
+                                  + QString::fromStdString(e.what()));
     }
 }
+
 
 void MainWindow::onCancelProfile()
 {
@@ -1345,6 +1380,15 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
 
     return QMainWindow::eventFilter(obj, event);
+}
+void MainWindow::onTogglePassword(bool checked)
+{
+    ui->line_contra->setEchoMode(
+        checked ? QLineEdit::Normal : QLineEdit::Password
+        );
+    ui->btnShowPassword->setIcon(
+        QIcon(checked ? ":icon/resources/icons/eye-open.png" : ":icon/resources/icons/eye-closed.svg")
+        );
 }
 
 void MainWindow::clearArcPreview()

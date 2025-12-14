@@ -49,6 +49,7 @@ private slots:
     void onlogin();
     void onLoginSuccess(const User &u);
     void back();
+    void onTogglePassword(bool checked);
 
     // Problemas
     void initializeProblems();

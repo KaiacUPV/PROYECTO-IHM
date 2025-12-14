@@ -76,12 +76,19 @@ void signup::onAccept()
             return;
         }
     }
+    QImage finalAvatar;
+
+    if (selectedAvatar.isNull()) {
+        finalAvatar.load(":/icon/resources/icons/perfil.jpg");
+    } else {
+        finalAvatar = selectedAvatar;
+    }
 
     User newUser(
         nick,
         email,
         hashPassword(pass1),   // 🔐 HASH
-        selectedAvatar,
+        finalAvatar,
         ui->date_birth->date()
         );
 
