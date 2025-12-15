@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <random>
 #include <QFileDialog>
+#include <QSpinBox>
 #include <QRegularExpression>
 #include <QCryptographicHash>
 
@@ -867,26 +868,69 @@ void MainWindow::onLinea()  { currentTool = TOOL_LINEA; updateToolSelection(TOOL
 
 void MainWindow::onColor()
 {
-    activeColor = QColorDialog::getColor(Qt::red, this);
+    QDialog dialog(this);
+    dialog.setWindowTitle("Configurar Color, Grosor y Tamaño de Texto");
+    dialog.setModal(true);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    // Color selection
+    QHBoxLayout *colorLayout = new QHBoxLayout();
+    QLabel *colorLabel = new QLabel("Color:");
+    QPushButton *colorButton = new QPushButton("Seleccionar Color");
+    colorButton->setStyleSheet(QString("background-color: %1").arg(activeColor.name()));
+    colorLayout->addWidget(colorLabel);
+    colorLayout->addWidget(colorButton);
+    layout->addLayout(colorLayout);
+
+    // Width selection
+    QHBoxLayout *widthLayout = new QHBoxLayout();
+    QLabel *widthLabel = new QLabel("Grosor de línea:");
+    QSpinBox *widthSpin = new QSpinBox();
+    widthSpin->setRange(1, 20);
+    widthSpin->setValue(activeWidth);
+    widthLayout->addWidget(widthLabel);
+    widthLayout->addWidget(widthSpin);
+    layout->addLayout(widthLayout);
+
+    // Font size selection
+    QHBoxLayout *fontLayout = new QHBoxLayout();
+    QLabel *fontLabel = new QLabel("Tamaño del texto:");
+    QSpinBox *fontSpin = new QSpinBox();
+    fontSpin->setRange(8, 72);
+    fontSpin->setValue(activeFontSize);
+    fontLayout->addWidget(fontLabel);
+    fontLayout->addWidget(fontSpin);
+    layout->addLayout(fontLayout);
+
+    // Buttons
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *okButton = new QPushButton("Aceptar");
+    QPushButton *cancelButton = new QPushButton("Cancelar");
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
+
+    // Connect color button
+    connect(colorButton, &QPushButton::clicked, [&]() {
+        QColor newColor = QColorDialog::getColor(activeColor, &dialog);
+        if (newColor.isValid()) {
+            activeColor = newColor;
+            colorButton->setStyleSheet(QString("background-color: %1").arg(activeColor.name()));
+        }
+    });
+
+    // Connect buttons
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        activeWidth = widthSpin->value();
+        activeFontSize = fontSpin->value();
+    }
+
     currentTool = TOOL_COLOR;
     updateToolSelection(TOOL_COLOR);
-
-    bool ok1;
-    int w = QInputDialog::getInt(this, "Grosor de línea",
-                                 "Introduce un grosor (1–20):",
-                                 activeWidth,
-                                 1, 20, 1, &ok1);
-    if (ok1) activeWidth = w;
-
-    bool ok2;
-    int fs = QInputDialog::getInt(this, "Tamaño del texto",
-                                  "Introduce tamaño del texto (8–72):",
-                                  activeFontSize,
-                                  8, 72, 1, &ok2);
-    if (ok2) activeFontSize = fs;
-
-    QMessageBox::information(this, "Color",
-                             "Color, grosor y tamaño de texto configurados.");
 }
 
 void MainWindow::onMover()  {
@@ -1159,9 +1203,36 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     if (!scene || !view || obj != view->viewport())
         return QMainWindow::eventFilter(obj, event);
     {
-        // --- Wheel event: ignore all ---
+        // --- Wheel event: handle zoom or rotation ---
         if (event->type() == QEvent::Wheel)
         {
+            QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);
+            if (wheelEvent->modifiers() & Qt::ShiftModifier)
+            {
+                // Shift + wheel: rotate tool if regla or transportador is selected
+                if (currentTool == TOOL_REGLA && regla)
+                {
+                    double delta = wheelEvent->angleDelta().y() > 0 ? 5.0 : -5.0;
+                    regla->setRotation(regla->rotation() + delta);
+                }
+                else if (currentTool == TOOL_TRANSPORTADOR && transportador)
+                {
+                    double delta = wheelEvent->angleDelta().y() > 0 ? 5.0 : -5.0;
+                    transportador->setRotation(transportador->rotation() + delta);
+                }
+            }
+            else
+            {
+                // Normal wheel: zoom
+                if (wheelEvent->angleDelta().y() > 0)
+                {
+                    onZoomIn();
+                }
+                else if (wheelEvent->angleDelta().y() < 0)
+                {
+                    onZoomOut();
+                }
+            }
             return true;
         }
 
