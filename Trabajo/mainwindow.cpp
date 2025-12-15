@@ -961,6 +961,15 @@ void MainWindow::centerToolOnView(Tool *tool)
 
 void MainWindow::updateToolSelection(int tool)
 {
+    // Limpiar previews temporales antes de cambiar de herramienta
+    clearArcPreview();
+    if (tempLine) {
+        scene->removeItem(tempLine);
+        delete tempLine;
+        tempLine = nullptr;
+    }
+    drawingLine = false;
+
     // Desmarcar todos los botones de herramientas
     ui->btnTexto->setChecked(false);
     ui->btnPunto->setChecked(false);
@@ -1086,7 +1095,8 @@ void MainWindow::toggleTheme()
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == view->viewport())
+    if (!scene || !view || obj != view->viewport())
+        return QMainWindow::eventFilter(obj, event);
     {
         // --- Botón presionado ---
         if (event->type() == QEvent::MouseButtonPress)
@@ -1172,6 +1182,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 // ======================================================
                 if (currentTool == TOOL_COMPAS)
                 {
+                    // Verificación de seguridad: asegurar que no hay operaciones pendientes
+                    if (arcStep < 0 || arcStep > 2) {
+                        arcStep = 0;
+                        clearArcPreview();
+                        return true;
+                    }
                     if (arcStep == 0) {
                         arcA = p; arcStep = 1;
                         // Create center marker
@@ -1215,7 +1231,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                             double startAngle = QLineF(arcA, arcB).angle();
                             double endAngle   = QLineF(arcA, arcC).angle();
                             double span = endAngle - startAngle;
-                            if (span < 0) span += 360;
+
+                            // Normalizar el span para que esté entre -180 y 180 grados
+                            // Esto permite arcos en ambos sentidos: positivo = horario, negativo = antihorario
+                            while (span > 180) span -= 360;
+                            while (span < -180) span += 360;
 
                             QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
                             QPainterPath path;
@@ -1272,6 +1292,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         // ============================================================
         if (event->type() == QEvent::MouseMove && currentTool == TOOL_COMPAS)
         {
+            // Verificación de seguridad: solo procesar si el estado es válido
+            if (arcStep < 1 || arcStep > 2) return true;
+
             QMouseEvent *e = static_cast<QMouseEvent*>(event);
             QPointF p = view->mapToScene(e->pos());
 
@@ -1309,7 +1332,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 double startAngle = QLineF(arcA, arcB).angle();
                 double endAngle   = QLineF(arcA, p).angle();
                 double span = endAngle - startAngle;
-                if (span < 0) span += 360;
+
+                // Normalizar el span para que esté entre -180 y 180 grados
+                // Esto permite arcos en ambos sentidos: positivo = horario, negativo = antihorario
+                while (span > 180) span -= 360;
+                while (span < -180) span += 360;
 
                 QRectF rect(arcA.x()-r, arcA.y()-r, 2*r, 2*r);
                 QPainterPath path;
