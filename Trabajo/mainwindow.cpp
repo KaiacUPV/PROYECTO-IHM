@@ -1027,6 +1027,57 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
+// ==========================================================
+//     ATAJOS DE TECLADO PARA HERRAMIENTAS
+// ==========================================================
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    // Atajos sin modificadores
+    switch (event->key()) {
+        case Qt::Key_R:
+            onRegla();
+            break;
+        case Qt::Key_C:
+            onCompas();
+            break;
+        case Qt::Key_L:
+            onLinea();
+            break;
+        case Qt::Key_P:
+            onPunto();
+            break;
+        case Qt::Key_T:
+            onTexto();
+            break;
+        case Qt::Key_B:
+            onBorrar();
+            break;
+        case Qt::Key_Delete:
+            onLimpiar();
+            break;
+        default:
+            break;
+    }
+
+    // Atajos con Shift
+    if (event->modifiers() & Qt::ShiftModifier) {
+        switch (event->key()) {
+            case Qt::Key_T:
+                onTransportador();
+                break;
+            case Qt::Key_C:
+                onColor();
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Llamar al handler base para otros eventos
+    QMainWindow::keyPressEvent(event);
+}
+
 void MainWindow::applyZoom(double factor)
 {
     double newZoom = zoomLevel * factor;
