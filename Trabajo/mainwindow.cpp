@@ -100,7 +100,11 @@ MainWindow::MainWindow(QWidget *parent)
     // === Insertar el QGraphicsView dentro del mapwidget ===
     view = new QGraphicsView(ui->mapwidget);
     view->setScene(scene);
-    view->setDragMode(QGraphicsView::ScrollHandDrag);
+    view->setDragMode(QGraphicsView::NoDrag);  // Desactivar drag por defecto
+
+    // Quitar las barras de desplazamiento
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QVBoxLayout *lay = new QVBoxLayout(ui->mapwidget);
     lay->setContentsMargins(0,0,0,0);
@@ -885,7 +889,11 @@ void MainWindow::onColor()
                              "Color, grosor y tamaño de texto configurados.");
 }
 
-void MainWindow::onMover()  { currentTool = TOOL_MOVER; updateToolSelection(TOOL_MOVER); }
+void MainWindow::onMover()  {
+    currentTool = TOOL_MOVER;
+    updateToolSelection(TOOL_MOVER);
+    view->setDragMode(QGraphicsView::ScrollHandDrag);  // Activar drag solo con herramienta mover
+}
 void MainWindow::onZoomIn()   { zoomLevel += 0.1; view->scale(1.1, 1.1); }
 void MainWindow::onZoomOut()  { zoomLevel -= 0.1; view->scale(0.9, 0.9); }
 void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; updateToolSelection(TOOL_BORRAR); }
@@ -961,6 +969,9 @@ void MainWindow::centerToolOnView(Tool *tool)
 
 void MainWindow::updateToolSelection(int tool)
 {
+    // Desactivar drag mode por defecto (solo activo con herramienta mover)
+    view->setDragMode(QGraphicsView::NoDrag);
+
     // Limpiar previews temporales antes de cambiar de herramienta
     clearArcPreview();
     if (tempLine) {
@@ -1021,16 +1032,9 @@ void MainWindow::updateToolSelection(int tool)
 
 void MainWindow::wheelEvent(QWheelEvent *event)
 {
-    // Solo hacer zoom si NO se presiona Ctrl
-    if (!(event->modifiers() & Qt::ControlModifier)) {
-        double factor = (event->angleDelta().y() > 0) ? 1.15 : 0.85;
-        view->scale(factor, factor);
-        zoomLevel *= factor;
-        event->accept();
-    } else {
-        // Si se presiona Ctrl, no hacer nada (deshabilitar zoom con Ctrl)
-        event->ignore();
-    }
+    // Deshabilitar completamente el zoom con la rueda del mouse
+    // Solo se permite zoom con los botones dedicados
+    event->ignore();
 }
 
 // ==========================================================
@@ -1058,9 +1062,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_B:
             onBorrar();
-            break;
-        case Qt::Key_M:
-            onMover();
             break;
         case Qt::Key_Delete:
             onLimpiar();
@@ -1158,29 +1159,31 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     if (!scene || !view || obj != view->viewport())
         return QMainWindow::eventFilter(obj, event);
     {
+        // --- Wheel event: ignore all ---
+        if (event->type() == QEvent::Wheel)
+        {
+            return true;
+        }
+
         // --- Botón presionado ---
         if (event->type() == QEvent::MouseButtonPress)
         {
             QMouseEvent *e = static_cast<QMouseEvent*>(event);
 
-            // CLICK DERECHO → MOVER MAPA
-            if (e->button() == Qt::RightButton)
+            // CLICK CENTRAL → ACTIVAR/DESACTIVAR HERRAMIENTA MOVER
+            if (e->button() == Qt::MiddleButton)
             {
-                clearArcPreview();
-                view->setDragMode(QGraphicsView::ScrollHandDrag);
-
-                QMouseEvent fakePress(
-                    QEvent::MouseButtonPress,
-                    e->pos(),
-                    e->globalPosition().toPoint(),  // Qt6
-                    Qt::LeftButton,
-                    Qt::LeftButton,
-                    e->modifiers()
-                    );
-                QApplication::sendEvent(obj, &fakePress);
-
+                onMover();
                 return true;
             }
+
+            // CLICK DERECHO → Ya no activa drag mode (solo con herramienta mover)
+            // if (e->button() == Qt::RightButton)
+            // {
+            //     clearArcPreview();
+            //     view->setDragMode(QGraphicsView::ScrollHandDrag);
+            //     ...
+            // }
 
             // CLICK IZQUIERDO → herramientas
             if (e->button() == Qt::LeftButton)
@@ -1424,44 +1427,26 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
 
         // --- Botón derecho soltado ---
-        if (event->type() == QEvent::MouseButtonRelease)
-        {
-            QMouseEvent *e = static_cast<QMouseEvent*>(event);
-
-            if (e->button() == Qt::RightButton)
-            {
-                QMouseEvent fakeRelease(
-                    QEvent::MouseButtonRelease,
-                    e->pos(),
-                    e->globalPosition().toPoint(),  // Qt6
-                    Qt::LeftButton,
-                    Qt::LeftButton,
-                    e->modifiers()
-                    );
-                QApplication::sendEvent(obj, &fakeRelease);
-
-                view->setDragMode(QGraphicsView::NoDrag);
-                return true;
-            }
-        }
-    }
-
-    // ============================================================
-    //              ZOOM CONTROL + RUEDA
-    // ============================================================
-    if (event->type() == QEvent::Wheel)
-    {
-        QWheelEvent *we = static_cast<QWheelEvent*>(event);
-
-        if (!(we->modifiers() & Qt::ControlModifier))
-            return false;
-
-        if (we->angleDelta().y() > 0)
-            applyZoom(1.15);
-        else
-            applyZoom(1.0 / 1.15);
-
-        return true;
+        // if (event->type() == QEvent::MouseButtonRelease)
+        // {
+        //     QMouseEvent *e = static_cast<QMouseEvent*>(event);
+        //
+        //     if (e->button() == Qt::RightButton)
+        //     {
+        //         QMouseEvent fakeRelease(
+        //             QEvent::MouseButtonRelease,
+        //             e->pos(),
+        //             e->globalPosition().toPoint(),  // Qt6
+        //             Qt::LeftButton,
+        //             Qt::LeftButton,
+        //             e->modifiers()
+        //             );
+        //         QApplication::sendEvent(obj, &fakeRelease);
+        //
+        //         view->setDragMode(QGraphicsView::NoDrag);
+        //         return true;
+        //     }
+        // }
     }
 
     return QMainWindow::eventFilter(obj, event);

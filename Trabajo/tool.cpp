@@ -81,27 +81,8 @@ void Tool::updateOrigin()
 
 void Tool::wheelEvent(QGraphicsSceneWheelEvent *event)
 {
-    // Solo rotar si está pulsado Shift
-    if (!(QApplication::keyboardModifiers() & Qt::ShiftModifier)) {
-        event->ignore();
-        return;
-    }
-
-    const int delta = event->delta(); // Qt5: 120 por "clic" de rueda
-    if (delta == 0) {
-        event->ignore();
-        return;
-    }
-
-    // Igual que antes: rotación suave
-    double deltaDegrees = (delta / 8.0) * 0.1; // ≈ 1.5° por "clic"
-    m_angleDeg += deltaDegrees;
-    setRotation(m_angleDeg);
-
-    if (scene())
-        scene()->update();
-
-    event->accept();
+    // Desactivar completamente el uso de la rueda del mouse en las herramientas
+    event->ignore();
 }
 
 void Tool::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
