@@ -1021,10 +1021,16 @@ void MainWindow::updateToolSelection(int tool)
 
 void MainWindow::wheelEvent(QWheelEvent *event)
 {
-    double factor = (event->angleDelta().y() > 0) ? 1.15 : 0.85;
-    view->scale(factor, factor);
-    zoomLevel *= factor;
-    event->accept();
+    // Solo hacer zoom si NO se presiona Ctrl
+    if (!(event->modifiers() & Qt::ControlModifier)) {
+        double factor = (event->angleDelta().y() > 0) ? 1.15 : 0.85;
+        view->scale(factor, factor);
+        zoomLevel *= factor;
+        event->accept();
+    } else {
+        // Si se presiona Ctrl, no hacer nada (deshabilitar zoom con Ctrl)
+        event->ignore();
+    }
 }
 
 // ==========================================================
@@ -1052,6 +1058,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_B:
             onBorrar();
+            break;
+        case Qt::Key_M:
+            onMover();
             break;
         case Qt::Key_Delete:
             onLimpiar();
