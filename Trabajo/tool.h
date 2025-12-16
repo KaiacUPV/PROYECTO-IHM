@@ -27,6 +27,9 @@ public:
     enum ProjectEdge { EdgeCenter = 0, EdgeTop = 1, EdgeBottom = 2 };
     QPointF projectPoint(const QPointF& scenePoint, ProjectEdge edge = EdgeCenter) const;
 
+    // Rotate the tool around a specific point in scene coordinates
+    void rotateAround(const QPointF& scenePoint, double angleDelta);
+
 protected:
     void wheelEvent(QGraphicsSceneWheelEvent *event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;

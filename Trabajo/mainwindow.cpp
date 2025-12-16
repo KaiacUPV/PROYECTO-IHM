@@ -102,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent)
     view = new QGraphicsView(ui->mapwidget);
     view->setScene(scene);
     view->setDragMode(QGraphicsView::NoDrag);  // Desactivar drag por defecto
+    view->setMouseTracking(true);
+    view->viewport()->setMouseTracking(true);
 
     // Quitar las barras de desplazamiento
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -152,7 +154,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnShowPassword->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
 
     // Logout button (page_usuario)
-    connect(ui->btnlogin_2, &QPushButton::clicked, this, &MainWindow::onLogout);
+    connect(ui->btnlogout, &QToolButton::clicked, this, &MainWindow::onLogout);
 
     // Botones de herramientas
     connect(ui->btnTexto,   &QToolButton::clicked, this, &MainWindow::onTexto);
@@ -235,7 +237,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Make drawing tool buttons checkable and group them for exclusive selection
     QButtonGroup *toolButtons = new QButtonGroup(this);
-    toolButtons->setExclusive(true);
+    toolButtons->setExclusive(false);
     ui->btnTexto->setCheckable(true);
     ui->btnPunto->setCheckable(true);
     ui->btnLinea->setCheckable(true);
@@ -598,11 +600,17 @@ void MainWindow::loadProblem(int index)
     ui->radioBtnC->setText(QStringLiteral("C: ") + m_currentAnswersRandom[2].text());
     ui->radioBtnD->setText(QStringLiteral("D: ") + m_currentAnswersRandom[3].text());
 
-    // Desmarcar
-    ui->radioBtnA->setChecked(false);
-    ui->radioBtnB->setChecked(false);
-    ui->radioBtnC->setChecked(false);
-    ui->radioBtnD->setChecked(false);
+    // Desmarcar de forma robusta usando el grupo
+    if (auto group = ui->radioBtnA->group()) {
+        group->setExclusive(false);
+        if (group->checkedButton()) group->checkedButton()->setChecked(false);
+        group->setExclusive(true);
+    } else {
+        ui->radioBtnA->setChecked(false);
+        ui->radioBtnB->setChecked(false);
+        ui->radioBtnC->setChecked(false);
+        ui->radioBtnD->setChecked(false);
+    }
 
     // Forzar estado inicial deshabilitado hasta que el usuario elija una opción
     ui->btnCorregir->setEnabled(false);
@@ -667,6 +675,16 @@ void MainWindow::on_btnCorregir_clicked()
 void MainWindow::loadCarta()
 {
     scene->clear();
+
+    // Reset pointers to avoid dangling references after scene->clear()
+    regla = nullptr;
+    compas = nullptr;
+    transportador = nullptr;
+    tempLine = nullptr;
+    tempArc = nullptr;
+    arcMarkerCenter = nullptr;
+    arcMarkerStart = nullptr;
+    arcMarkerEnd = nullptr;
 
     cartaPixmap = QPixmap(":/resources/carta_nautica.jpg");
     if (cartaPixmap.isNull())
@@ -762,7 +780,7 @@ void MainWindow::onLoginSuccess(const User &u)
     ui->stackedWidget->setCurrentWidget(ui->page);
 
     QList<int> sizes;
-    sizes << 150 << 900;
+    sizes << 150 << 100;
     ui->splitter->setSizes(sizes);
 }
 
@@ -851,6 +869,19 @@ void MainWindow::onProblemas()
         return;
     }
 
+    // Limpiar selección de respuestas al entrar
+    if (auto group = ui->radioBtnA->group()) {
+        group->setExclusive(false);
+        if (group->checkedButton()) group->checkedButton()->setChecked(false);
+        group->setExclusive(true);
+    } else {
+        ui->radioBtnA->setChecked(false);
+        ui->radioBtnB->setChecked(false);
+        ui->radioBtnC->setChecked(false);
+        ui->radioBtnD->setChecked(false);
+    }
+    ui->btnCorregir->setEnabled(false);
+
     ui->stackedWidget->setCurrentWidget(ui->page_problem);
 
     QList<int> sizes;
@@ -862,9 +893,38 @@ void MainWindow::onProblemas()
 //     HERRAMIENTAS
 // ==========================================================
 
-void MainWindow::onTexto()  { currentTool = TOOL_TEXTO; updateToolSelection(TOOL_TEXTO); }
-void MainWindow::onPunto()  { currentTool = TOOL_PUNTO; updateToolSelection(TOOL_PUNTO); }
-void MainWindow::onLinea()  { currentTool = TOOL_LINEA; updateToolSelection(TOOL_LINEA); }
+void MainWindow::onTexto()
+{
+    if (currentTool == TOOL_TEXTO) {
+        currentTool = TOOL_NONE;
+        updateToolSelection(TOOL_NONE);
+        return;
+    }
+    currentTool = TOOL_TEXTO;
+    updateToolSelection(TOOL_TEXTO);
+}
+
+void MainWindow::onPunto()
+{
+    if (currentTool == TOOL_PUNTO) {
+        currentTool = TOOL_NONE;
+        updateToolSelection(TOOL_NONE);
+        return;
+    }
+    currentTool = TOOL_PUNTO;
+    updateToolSelection(TOOL_PUNTO);
+}
+
+void MainWindow::onLinea()
+{
+    if (currentTool == TOOL_LINEA) {
+        currentTool = TOOL_NONE;
+        updateToolSelection(TOOL_NONE);
+        return;
+    }
+    currentTool = TOOL_LINEA;
+    updateToolSelection(TOOL_LINEA);
+}
 
 void MainWindow::onColor()
 {
@@ -933,14 +993,29 @@ void MainWindow::onColor()
     updateToolSelection(TOOL_COLOR);
 }
 
-void MainWindow::onMover()  {
+void MainWindow::onMover()
+{
+    if (currentTool == TOOL_MOVER) {
+        currentTool = TOOL_NONE;
+        updateToolSelection(TOOL_NONE);
+        return;
+    }
     currentTool = TOOL_MOVER;
     updateToolSelection(TOOL_MOVER);
-    view->setDragMode(QGraphicsView::ScrollHandDrag);  // Activar drag solo con herramienta mover
+    view->setDragMode(QGraphicsView::ScrollHandDrag);
 }
 void MainWindow::onZoomIn()   { zoomLevel += 0.1; view->scale(1.1, 1.1); }
 void MainWindow::onZoomOut()  { zoomLevel -= 0.1; view->scale(0.9, 0.9); }
-void MainWindow::onBorrar() { currentTool = TOOL_BORRAR; updateToolSelection(TOOL_BORRAR); }
+void MainWindow::onBorrar()
+{
+    if (currentTool == TOOL_BORRAR) {
+        currentTool = TOOL_NONE;
+        updateToolSelection(TOOL_NONE);
+        return;
+    }
+    currentTool = TOOL_BORRAR;
+    updateToolSelection(TOOL_BORRAR);
+}
 
 void MainWindow::onLimpiar()
 {
@@ -950,31 +1025,39 @@ void MainWindow::onLimpiar()
 
 void MainWindow::onRegla()
 {
+    if (regla && regla->isVisible()) {
+        regla->setVisible(false);
+        if (currentTool == TOOL_REGLA) {
+            currentTool = TOOL_NONE;
+            updateToolSelection(TOOL_NONE);
+        }
+        return;
+    }
+
     if (!regla) {
         regla = new Tool(":icon/resources/icons/ruler.svg");
         regla->setToolSize(QSizeF(350, 60));
         scene->addItem(regla);
     }
 
-    // Toggle placement on repeated clicks: if already placed, unplace for repositioning
-    clearArcPreview();
-    if (regla->isPlaced())
-    {
-        regla->setPlaced(false);
-        statusBar()->showMessage("Regla desbloqueada: arrastra para mover", 4000);
-    }
-    else
-    {
-        centerToolOnView(regla);
-        regla->setPlaced(true);
-        statusBar()->showMessage("Regla colocada: Mantén Ctrl y arrastra para moverla", 5000);
-    }
+    regla->setVisible(true);
+    centerToolOnView(regla);
+    regla->setPlaced(true);
+    
     currentTool = TOOL_REGLA;
     updateToolSelection(TOOL_REGLA);
+    statusBar()->showMessage("Regla activada", 4000);
 }
 
 void MainWindow::onCompas()
 {
+    if (currentTool == TOOL_COMPAS) {
+        currentTool = TOOL_NONE;
+        updateToolSelection(TOOL_NONE);
+        clearArcPreview();
+        return;
+    }
+
     currentTool = TOOL_COMPAS;
     arcStep = 0;
     updateToolSelection(TOOL_COMPAS);
@@ -984,17 +1067,28 @@ void MainWindow::onCompas()
 
 void MainWindow::onTransportador()
 {
+    if (transportador && transportador->isVisible()) {
+        transportador->setVisible(false);
+        if (currentTool == TOOL_TRANSPORTADOR) {
+            currentTool = TOOL_NONE;
+            updateToolSelection(TOOL_NONE);
+        }
+        return;
+    }
+
     if (!transportador) {
         transportador = new Tool(":icon/resources/icons/transportador.svg");
         transportador->setToolSize(QSizeF(400, 250));
         scene->addItem(transportador);
     }
 
-    clearArcPreview();
-    if (transportador->isPlaced()) { transportador->setPlaced(false); statusBar()->showMessage("Transportador desbloqueado: arrastra para mover", 4000); }
-    else { centerToolOnView(transportador); transportador->setPlaced(true); statusBar()->showMessage("Transportador colocado: Mantén Ctrl y arrastra para moverlo", 4000); }
+    transportador->setVisible(true);
+    centerToolOnView(transportador);
+    transportador->setPlaced(true);
+
     currentTool = TOOL_TRANSPORTADOR;
     updateToolSelection(TOOL_TRANSPORTADOR);
+    statusBar()->showMessage("Transportador activado", 4000);
 }
 
 void MainWindow::centerToolOnView(Tool *tool)
@@ -1068,6 +1162,9 @@ void MainWindow::updateToolSelection(int tool)
         default:
             break;
     }
+
+    // Remove focus from buttons to prevent focus border artifacts
+    if (view) view->setFocus();
 }
 
 // ==========================================================
@@ -1154,6 +1251,15 @@ void MainWindow::applyZoom(double factor)
 
 Tool *MainWindow::findNearestPlacedTool(const QPointF &scenePoint)
 {
+    // 1. Prioritize tool under cursor (allows drawing "on" the tool regardless of zoom)
+    if (regla && regla->isPlaced() && regla->contains(regla->mapFromScene(scenePoint)))
+        return regla;
+    if (transportador && transportador->isPlaced() && transportador->contains(transportador->mapFromScene(scenePoint)))
+        return transportador;
+    if (compas && compas->isPlaced() && compas->contains(compas->mapFromScene(scenePoint)))
+        return compas;
+
+    // 2. Fallback to closest edge
     Tool *best = nullptr;
     double bestDist = std::numeric_limits<double>::infinity();
 
@@ -1210,15 +1316,25 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             if (wheelEvent->modifiers() & Qt::ShiftModifier)
             {
                 // Shift + wheel: rotate tool if regla or transportador is selected
+                QPointF mouseScenePos = view->mapToScene(wheelEvent->position().toPoint());
+
                 if (currentTool == TOOL_REGLA && regla)
                 {
                     double delta = wheelEvent->angleDelta().y() > 0 ? 5.0 : -5.0;
-                    regla->setRotation(regla->rotation() + delta);
+                    if (regla->contains(regla->mapFromScene(mouseScenePos))) {
+                        regla->rotateAround(mouseScenePos, delta);
+                    } else {
+                        regla->setRotation(regla->rotation() + delta);
+                    }
                 }
                 else if (currentTool == TOOL_TRANSPORTADOR && transportador)
                 {
                     double delta = wheelEvent->angleDelta().y() > 0 ? 5.0 : -5.0;
-                    transportador->setRotation(transportador->rotation() + delta);
+                    if (transportador->contains(transportador->mapFromScene(mouseScenePos))) {
+                        transportador->rotateAround(mouseScenePos, delta);
+                    } else {
+                        transportador->setRotation(transportador->rotation() + delta);
+                    }
                 }
             }
             else

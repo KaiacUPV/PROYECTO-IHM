@@ -15,11 +15,10 @@
 Tool::Tool(const QString& svgResourcePath, QGraphicsItem* parent)
     : QGraphicsSvgItem(svgResourcePath, parent)
 {
-    // Flags para poder moverla, seleccionarla y que ignore las transformaciones del view
+    // Flags para poder moverla, seleccionarla
     setFlags(QGraphicsItem::ItemIsMovable
              | QGraphicsItem::ItemIsSelectable
-             | QGraphicsItem::ItemSendsGeometryChanges
-             | QGraphicsItem::ItemIgnoresTransformations);
+             | QGraphicsItem::ItemSendsGeometryChanges);
 
     // Origen de rotación = centro del SVG
     updateOrigin();
@@ -146,6 +145,15 @@ QPointF Tool::projectPoint(const QPointF& scenePoint, ProjectEdge edge) const
     const double t = ((scenePoint.x()-a.x())*dx + (scenePoint.y()-a.y())*dy) / len2;
     const double tc = qBound(0.0, t, 1.0);
     return QPointF(a.x() + tc*dx, a.y() + tc*dy);
+}
+
+void Tool::rotateAround(const QPointF& scenePoint, double angleDelta)
+{
+    QPointF localPoint = mapFromScene(scenePoint);
+    setRotation(rotation() + angleDelta);
+    QPointF newScenePoint = mapToScene(localPoint);
+    QPointF diff = scenePoint - newScenePoint;
+    setPos(pos() + diff);
 }
 
 void Tool::mousePressEvent(QGraphicsSceneMouseEvent *event)

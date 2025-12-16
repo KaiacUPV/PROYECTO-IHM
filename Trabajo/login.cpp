@@ -72,7 +72,7 @@ void login::onAccept()
         return;
     }
 
-    QMessageBox::information(this, "Correcto", "Inicio de sesión correcto.");
+    // QMessageBox::information(this, "Correcto", "Inicio de sesión correcto.");
     emit loginSuccess(foundUser);
     close();
 }

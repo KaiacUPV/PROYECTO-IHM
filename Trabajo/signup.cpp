@@ -136,7 +136,7 @@ void signup::onAccept()
     nav.dao().saveUser(newUser);
     nav.addUser(newUser);
 
-    QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
+    // QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
     emit signupSuccess(newUser);
     close();
 }
