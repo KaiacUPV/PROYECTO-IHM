@@ -22,7 +22,6 @@ signals:
 
 private slots:
     void onAccept();
-    void onCancel();
     void onSignup();
     void onTogglePassword(bool checked);
 

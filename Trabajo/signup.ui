@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
-    <height>525</height>
+    <width>518</width>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,23 @@
    <item row="0" column="0" rowspan="2" colspan="2">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="4" column="0" colspan="2">
-       <widget class="QLineEdit" name="txt_nick"/>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="leName">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Nickname</string>
+        </property>
+       </widget>
       </item>
       <item row="9" column="0" colspan="2">
        <widget class="QLabel" name="Repeat_Label">
@@ -38,42 +53,18 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="leName">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="10" column="3">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-        <property name="text">
-         <string>Nickname</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0" colspan="2">
-       <widget class="QLineEdit" name="lineEdit_3">
-        <property name="echoMode">
-         <enum>QLineEdit::EchoMode::Password</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="5">
-       <widget class="QPushButton" name="Cancel_Button">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Cancel</string>
-        </property>
-       </widget>
+       </spacer>
       </item>
       <item row="3" column="3">
        <widget class="QLabel" name="lebirth">
@@ -93,64 +84,21 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0" colspan="4">
-       <widget class="QLabel" name="Password_Label">
+      <item row="2" column="0">
+       <widget class="QPushButton" name="Btn_Avatar">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
-         <string>Password  (8 y 20 caracteres)</string>
+         <string>Editar</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="2">
-       <widget class="QToolButton" name="btnShowPass2">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="4">
-       <widget class="QPushButton" name="Accept_Button">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Accept</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0" colspan="2">
-       <widget class="QLineEdit" name="lineEdit_2">
-        <property name="font">
-         <font>
-          <stylestrategy>PreferDefault</stylestrategy>
-         </font>
-        </property>
-        <property name="echoMode">
-         <enum>QLineEdit::EchoMode::Password</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="3">
-       <widget class="QDateEdit" name="date_birth"/>
-      </item>
-      <item row="8" column="2">
-       <widget class="QToolButton" name="btnShowPass1">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+      <item row="6" column="0" colspan="4">
+       <widget class="QLineEdit" name="Text_Email"/>
       </item>
       <item row="5" column="0">
        <widget class="QLabel" name="leEmail">
@@ -170,29 +118,10 @@
         </property>
        </widget>
       </item>
-      <item row="10" column="3">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="Btn_Avatar">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Editar</string>
+      <item row="10" column="0" colspan="2">
+       <widget class="QLineEdit" name="lineEdit_3">
+        <property name="echoMode">
+         <enum>QLineEdit::EchoMode::Password</enum>
         </property>
        </widget>
       </item>
@@ -228,8 +157,67 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="4">
-       <widget class="QLineEdit" name="Text_Email"/>
+      <item row="4" column="0" colspan="2">
+       <widget class="QLineEdit" name="txt_nick"/>
+      </item>
+      <item row="10" column="2">
+       <widget class="QToolButton" name="btnShowPass2">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="4">
+       <widget class="QLabel" name="Password_Label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Password  (8 y 20 caracteres)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QDateEdit" name="date_birth"/>
+      </item>
+      <item row="8" column="0" colspan="2">
+       <widget class="QLineEdit" name="lineEdit_2">
+        <property name="font">
+         <font>
+          <stylestrategy>PreferDefault</stylestrategy>
+         </font>
+        </property>
+        <property name="echoMode">
+         <enum>QLineEdit::EchoMode::Password</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QToolButton" name="btnShowPass1">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="4">
+       <widget class="QPushButton" name="Accept_Button">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Accept</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

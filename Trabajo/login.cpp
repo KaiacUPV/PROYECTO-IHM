@@ -19,7 +19,6 @@ login::login(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->Accept_Button, &QPushButton::clicked, this, &login::onAccept);
-    connect(ui->Cancel_Button, &QPushButton::clicked, this, &login::onCancel);
     connect(ui->btnsingup,     &QToolButton::clicked, this, &login::onSignup);
     connect(ui->btnShowPassword, &QToolButton::toggled,
             this, &login::onTogglePassword);
@@ -70,14 +69,6 @@ login::login(QWidget *parent)
             background-color: #094771;
         }
 
-        /* Botón Cancelar (rojo/gris) */
-        QPushButton#Cancel_Button {
-            background-color: #D32F2F;
-        }
-        QPushButton#Cancel_Button:hover {
-            background-color: #F44336;
-        }
-
         /* Botón Signup (enlace o secundario) */
         QToolButton#btnsingup {
             background: transparent;
@@ -88,6 +79,23 @@ login::login(QWidget *parent)
         }
         QToolButton#btnsingup:hover {
             color: #69C0FF;
+        }
+
+        /* Botón Mostrar Contraseña */
+        QToolButton#btnShowPassword {
+            background-color: #3C3C3C;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            min-width: 40px; /* Ancho similar a un botón pequeño */
+            min-height: 35px;
+        }
+        QToolButton#btnShowPassword:hover {
+            background-color: #4C4C4C;
+            border: 1px solid #40A9FF;
+        }
+        QToolButton#btnShowPassword:checked {
+            background-color: #505050;
+            border: 1px solid #40A9FF;
         }
 
         /* Etiquetas */
@@ -141,11 +149,6 @@ void login::onAccept()
 
     // QMessageBox::information(this, "Correcto", "Inicio de sesión correcto.");
     emit loginSuccess(foundUser);
-    close();
-}
-
-void login::onCancel()
-{
     close();
 }
 

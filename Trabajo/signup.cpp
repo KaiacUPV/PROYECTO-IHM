@@ -57,7 +57,6 @@ signup::signup(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->Accept_Button, &QPushButton::clicked, this, &signup::onAccept);
-    connect(ui->Cancel_Button, &QPushButton::clicked, this, &signup::onCancel);
     connect(ui->Btn_Avatar, &QPushButton::clicked, this, &signup::on_btn_avatar_clicked);
 
     ui->btnShowPass1->setCheckable(true);
@@ -116,14 +115,6 @@ signup::signup(QWidget *parent)
             background-color: #094771;
         }
 
-        /* Botón Cancelar */
-        QPushButton#Cancel_Button {
-            background-color: #D32F2F;
-        }
-        QPushButton#Cancel_Button:hover {
-            background-color: #F44336;
-        }
-
         /* Botón Avatar */
         QPushButton#Btn_Avatar {
             background-color: #252526;
@@ -132,6 +123,23 @@ signup::signup(QWidget *parent)
         }
         QPushButton#Btn_Avatar:hover {
             background-color: #333333;
+        }
+
+        /* Botones Mostrar Contraseña */
+        QToolButton#btnShowPass1, QToolButton#btnShowPass2 {
+            background-color: #3C3C3C;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            min-width: 40px;
+            min-height: 35px;
+        }
+        QToolButton#btnShowPass1:hover, QToolButton#btnShowPass2:hover {
+            background-color: #4C4C4C;
+            border: 1px solid #40A9FF;
+        }
+        QToolButton#btnShowPass1:checked, QToolButton#btnShowPass2:checked {
+            background-color: #505050;
+            border: 1px solid #40A9FF;
         }
 
         /* Etiquetas */
@@ -201,11 +209,6 @@ void signup::onAccept()
 
     // QMessageBox::information(this, "Correcto", "Usuario creado correctamente.");
     emit signupSuccess(newUser);
-    close();
-}
-
-void signup::onCancel()
-{
     close();
 }
 
