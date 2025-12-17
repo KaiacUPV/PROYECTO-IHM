@@ -78,74 +78,80 @@ signup::signup(QWidget *parent)
 
     setWindowTitle("Carta Náutica - Registrarse");
 
-    // --- ESTILO VISUAL MEJORADO (QSS - DARK THEME) ---
+    // --- ESTILO VISUAL MEJORADO (QSS - APPLE STYLE DARK) ---
     const QString qss = R"(
         QWidget {
             background-color: #1E1E1E;
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-size: 14px;
             color: #E0E0E0;
         }
         
         /* Campos de texto */
         QLineEdit, QDateEdit {
-            background-color: #3C3C3C;
-            border: 1px solid #555555;
-            border-radius: 6px;
-            padding: 8px;
-            color: #E0E0E0;
+            background-color: #2C2C2E; /* Apple Dark Gray */
+            border: 1px solid #3A3A3C;
+            border-radius: 10px;       /* Rounded corners */
+            padding: 10px 12px;
+            color: #FFFFFF;
+            selection-background-color: #0A84FF;
         }
         QLineEdit:focus, QDateEdit:focus {
-            border: 1px solid #40A9FF;
+            border: 1px solid #0A84FF; /* Apple Blue Focus */
+            background-color: #3A3A3C;
         }
 
         /* Botones principales */
         QPushButton {
-            background-color: #0E639C;
+            background-color: #0A84FF; /* Apple Blue */
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-weight: bold;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 15px;
         }
         QPushButton:hover {
-            background-color: #1177BB;
+            background-color: #0077ED;
         }
         QPushButton:pressed {
-            background-color: #094771;
+            background-color: #0062C3;
         }
 
         /* Botón Avatar */
         QPushButton#Btn_Avatar {
-            background-color: #252526;
-            color: #40A9FF;
-            border: 1px dashed #40A9FF;
+            background-color: #2C2C2E;
+            color: #0A84FF;
+            border: 1px dashed #3A3A3C;
+            border-radius: 10px;
         }
         QPushButton#Btn_Avatar:hover {
-            background-color: #333333;
+            background-color: #3A3A3C;
+            border: 1px dashed #0A84FF;
         }
 
         /* Botones Mostrar Contraseña */
         QToolButton#btnShowPass1, QToolButton#btnShowPass2 {
-            background-color: #3C3C3C;
-            border: 1px solid #555555;
-            border-radius: 6px;
+            background-color: #2C2C2E;
+            border: 1px solid #3A3A3C;
+            border-radius: 10px;
             min-width: 40px;
             min-height: 35px;
         }
         QToolButton#btnShowPass1:hover, QToolButton#btnShowPass2:hover {
-            background-color: #4C4C4C;
-            border: 1px solid #40A9FF;
+            background-color: #3A3A3C;
+            border: 1px solid #0A84FF;
         }
         QToolButton#btnShowPass1:checked, QToolButton#btnShowPass2:checked {
-            background-color: #505050;
-            border: 1px solid #40A9FF;
+            background-color: #3A3A3C;
+            border: 1px solid #0A84FF;
+            background-color: rgba(10, 132, 255, 0.15);
         }
 
         /* Etiquetas */
         QLabel {
             color: #E0E0E0;
-            font-weight: 500;
+            font-weight: 400;
         }
     )";
     this->setStyleSheet(qss);
