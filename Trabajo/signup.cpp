@@ -78,6 +78,69 @@ signup::signup(QWidget *parent)
     ui->btnShowPass2->setAutoRaise(true);
 
     setWindowTitle("Carta Náutica - Registrarse");
+
+    // --- ESTILO VISUAL MEJORADO (QSS - DARK THEME) ---
+    const QString qss = R"(
+        QWidget {
+            background-color: #1E1E1E;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            font-size: 14px;
+            color: #E0E0E0;
+        }
+        
+        /* Campos de texto */
+        QLineEdit, QDateEdit {
+            background-color: #3C3C3C;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            padding: 8px;
+            color: #E0E0E0;
+        }
+        QLineEdit:focus, QDateEdit:focus {
+            border: 1px solid #40A9FF;
+        }
+
+        /* Botones principales */
+        QPushButton {
+            background-color: #0E639C;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        QPushButton:hover {
+            background-color: #1177BB;
+        }
+        QPushButton:pressed {
+            background-color: #094771;
+        }
+
+        /* Botón Cancelar */
+        QPushButton#Cancel_Button {
+            background-color: #D32F2F;
+        }
+        QPushButton#Cancel_Button:hover {
+            background-color: #F44336;
+        }
+
+        /* Botón Avatar */
+        QPushButton#Btn_Avatar {
+            background-color: #252526;
+            color: #40A9FF;
+            border: 1px dashed #40A9FF;
+        }
+        QPushButton#Btn_Avatar:hover {
+            background-color: #333333;
+        }
+
+        /* Etiquetas */
+        QLabel {
+            color: #E0E0E0;
+            font-weight: 500;
+        }
+    )";
+    this->setStyleSheet(qss);
 }
 
 

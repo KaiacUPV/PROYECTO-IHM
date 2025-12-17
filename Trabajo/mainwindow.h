@@ -59,6 +59,10 @@ private slots:
     void on_comboBox_currentIndexChanged(int index);
     void on_btnCorregir_clicked();
     void onAnswerSelected();
+    void onEstadistica();
+    void onDateFilterChanged(const QDate &date);
+    void onStatsModeChanged(int index);
+    void onProblemSelectChanged(int index);
 
     // Herramientas
     void onTexto();
@@ -83,6 +87,14 @@ private:
     bool validateEmail(const QString &email);
     bool validatePassword(const QString &password);
     void loadProfileUI();
+    void updateStatisticsTable(const QDate &filterDate);
+
+    struct ProblemAttempt {
+        QDateTime timestamp;
+        bool correct;
+    };
+    void saveProblemAttempt(int problemIndex, bool correct);
+    QVector<ProblemAttempt> loadProblemAttempts(const QString &username, int problemIndex);
 
     void applyZoom(double factor); // added declaration
     QPixmap makeRoundedPixmap(const QPixmap &src, int diameter);

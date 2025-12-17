@@ -30,6 +30,73 @@ login::login(QWidget *parent)
 
 
     setWindowTitle("Carta Náutica - Iniciar Sesión");
+
+    // --- ESTILO VISUAL MEJORADO (QSS - DARK THEME) ---
+    const QString qss = R"(
+        QWidget {
+            background-color: #1E1E1E;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            font-size: 14px;
+            color: #E0E0E0;
+        }
+        
+        /* Campos de texto */
+        QLineEdit {
+            background-color: #3C3C3C;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            padding: 8px;
+            color: #E0E0E0;
+            selection-background-color: #264F78;
+        }
+        QLineEdit:focus {
+            border: 1px solid #40A9FF;
+        }
+
+        /* Botones principales */
+        QPushButton {
+            background-color: #0E639C;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        QPushButton:hover {
+            background-color: #1177BB;
+        }
+        QPushButton:pressed {
+            background-color: #094771;
+        }
+
+        /* Botón Cancelar (rojo/gris) */
+        QPushButton#Cancel_Button {
+            background-color: #D32F2F;
+        }
+        QPushButton#Cancel_Button:hover {
+            background-color: #F44336;
+        }
+
+        /* Botón Signup (enlace o secundario) */
+        QToolButton#btnsingup {
+            background: transparent;
+            color: #40A9FF;
+            border: none;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        QToolButton#btnsingup:hover {
+            color: #69C0FF;
+        }
+
+        /* Etiquetas */
+        QLabel {
+            color: #E0E0E0;
+            font-weight: 500;
+        }
+    )";
+    this->setStyleSheet(qss);
 }
 
 login::~login()

@@ -25,13 +25,22 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(0, 0, 0);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(129, 129, 129);</string>
+    <string notr="true">background-color: rgb(44, 44, 44);</string>
    </property>
    <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="orientation">
        <enum>Qt::Orientation::Horizontal</enum>
       </property>
@@ -91,7 +100,7 @@
            <string notr="true">background-color: rgb(91, 91, 91);</string>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="page">
            <layout class="QGridLayout" name="gridLayout_6">
@@ -460,6 +469,24 @@
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QToolButton" name="btnEstadistica">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Estadísticas</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>
@@ -574,15 +601,43 @@
              <string/>
             </property>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="2" column="0">
-              <widget class="QLabel" name="lblUsuario">
+             <item row="5" column="0">
+              <widget class="QPushButton" name="btnguardar">
                <property name="text">
-                <string>ExampleNombre</string>
+                <string>Guardar</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="4">
+              <widget class="QLineEdit" name="line_email"/>
+             </item>
+             <item row="4" column="0" colspan="3">
+              <widget class="QLineEdit" name="line_contra">
+               <property name="echoMode">
+                <enum>QLineEdit::EchoMode::Normal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="btnVerEstadistica">
+               <property name="text">
+                <string>Ver Estadísticas</string>
                </property>
               </widget>
              </item>
              <item row="2" column="3">
               <widget class="QDateEdit" name="dateUser"/>
+             </item>
+             <item row="0" column="2">
+              <widget class="QWidget" name="widget" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout"/>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QPushButton" name="Btn_Avatar">
@@ -597,29 +652,6 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="4">
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="5" column="0">
-              <widget class="QPushButton" name="btnguardar">
-               <property name="text">
-                <string>Guardar</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0" colspan="4">
-              <widget class="QLineEdit" name="line_email"/>
-             </item>
              <item row="5" column="3">
               <widget class="QPushButton" name="pushButton_2">
                <property name="text">
@@ -627,22 +659,11 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="0" colspan="3">
-              <widget class="QLineEdit" name="line_contra">
-               <property name="echoMode">
-                <enum>QLineEdit::EchoMode::Normal</enum>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblUsuario">
+               <property name="text">
+                <string>ExampleNombre</string>
                </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QWidget" name="widget" native="true">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout"/>
               </widget>
              </item>
              <item row="0" column="0">
@@ -677,6 +698,19 @@
                </property>
               </widget>
              </item>
+             <item row="5" column="4">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
              <item row="4" column="3">
               <widget class="QToolButton" name="btnShowPassword">
                <property name="text">
@@ -701,139 +735,300 @@
              <string/>
             </property>
            </widget>
-           <widget class="QToolButton" name="btnAleatorio">
+           <widget class="QGroupBox" name="groupBox">
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>470</y>
-              <width>71</width>
-              <height>23</height>
+              <y>30</y>
+              <width>351</width>
+              <height>471</height>
              </rect>
             </property>
-            <property name="text">
-             <string>Aleatorio</string>
-            </property>
-           </widget>
-           <widget class="QToolButton" name="btnCorregir">
-            <property name="geometry">
-             <rect>
-              <x>140</x>
-              <y>470</y>
-              <width>71</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Corregir</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="prblemas">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>40</y>
-              <width>131</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>16</pointsize>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::WinPanel</enum>
-            </property>
-            <property name="text">
-             <string>Problemas</string>
-            </property>
-           </widget>
-           <widget class="QTextEdit" name="enunciado">
-            <property name="geometry">
-             <rect>
-              <x>3</x>
-              <y>89</y>
-              <width>331</width>
-              <height>221</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QGroupBox" name="groupAnswer">
-            <property name="geometry">
-             <rect>
-              <x>9</x>
-              <y>329</y>
-              <width>221</width>
-              <height>131</height>
-             </rect>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="title">
              <string/>
             </property>
-            <widget class="QRadioButton" name="radioBtnA">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>10</y>
-               <width>211</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>A</string>
-             </property>
-            </widget>
-            <widget class="QRadioButton" name="radioBtnB">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>40</y>
-               <width>211</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>B</string>
-             </property>
-            </widget>
-            <widget class="QRadioButton" name="radioBtnC">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>70</y>
-               <width>211</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>C</string>
-             </property>
-            </widget>
-            <widget class="QRadioButton" name="radioBtnD">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>100</y>
-               <width>211</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>D</string>
-             </property>
-            </widget>
+            <layout class="QGridLayout" name="gridLayout_7">
+             <item row="1" column="0" colspan="4">
+              <widget class="QTextEdit" name="enunciado"/>
+             </item>
+             <item row="2" column="0" colspan="3">
+              <widget class="QGroupBox" name="groupAnswer">
+               <property name="title">
+                <string/>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <item>
+                 <widget class="QRadioButton" name="radioBtnA">
+                  <property name="text">
+                   <string>A</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioBtnB">
+                  <property name="text">
+                   <string>B</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioBtnC">
+                  <property name="text">
+                   <string>C</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioBtnD">
+                  <property name="text">
+                   <string>D</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="prblemas">
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::WinPanel</enum>
+               </property>
+               <property name="text">
+                <string>Problemas</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QToolButton" name="btnAleatorio">
+               <property name="text">
+                <string>Aleatorio</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="comboBox"/>
+             </item>
+             <item row="0" column="2">
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="1">
+              <widget class="QToolButton" name="btnCorregir">
+               <property name="text">
+                <string>Corregir</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
-           <widget class="QComboBox" name="comboBox">
-            <property name="geometry">
-             <rect>
-              <x>160</x>
-              <y>40</y>
-              <width>72</width>
-              <height>24</height>
-             </rect>
-            </property>
-           </widget>
+          </widget>
+          <widget class="QWidget" name="page_estadistica">
+           <layout class="QVBoxLayout" name="verticalLayout_Stats">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_Header">
+              <item>
+               <widget class="QToolButton" name="btnBack3">
+                <property name="minimumSize">
+                 <size>
+                  <width>31</width>
+                  <height>23</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>31</width>
+                  <height>23</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_estadistica">
+                <property name="font">
+                 <font>
+                  <pointsize>14</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Estadísticas de Usuario</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_Stats">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_Filter">
+              <item>
+               <widget class="QLabel" name="label_filter">
+                <property name="text">
+                 <string>Mostrar desde:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateEdit" name="dateFilter">
+                <property name="displayFormat">
+                 <string>dd/MM/yyyy</string>
+                </property>
+                <property name="calendarPopup">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboStatsMode">
+                <item>
+                 <property name="text">
+                  <string>Por Sesiones</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Por Problema</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboProblemSelect">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_Filter">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="tableStats">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+              </property>
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Fecha y Hora</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Aciertos</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Fallos</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_Totals">
+              <item>
+               <widget class="QLabel" name="label_total_aciertos">
+                <property name="text">
+                 <string>Total Aciertos:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblTotalAciertos">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_Totals">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_total_fallos">
+                <property name="text">
+                 <string>Total Fallos:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblTotalFallos">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>

@@ -21,6 +21,13 @@
 #include <QSpinBox>
 #include <QRegularExpression>
 #include <QCryptographicHash>
+#include <QHeaderView>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFile>
+#include <QStandardPaths>
+#include <QDir>
 
 #include "login.h"
 #include "signup.h"
@@ -98,6 +105,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnBack2->setChecked(true);
     ui->btnBack2->setIconSize(iconSize);
 
+    ui->btnBack3->setIcon(QIcon(":icon/resources/icons/back.png"));
+    ui->btnBack3->setChecked(true);
+    ui->btnBack3->setIconSize(iconSize);
+
     // === Insertar el QGraphicsView dentro del mapwidget ===
     view = new QGraphicsView(ui->mapwidget);
     view->setScene(scene);
@@ -133,6 +144,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnProblemas,  &QToolButton::clicked, this, &MainWindow::onProblemas);
     ui->btnProblemas->setChecked(true);
 
+    connect(ui->btnEstadistica, &QToolButton::clicked, this, &MainWindow::onEstadistica);
+    ui->btnEstadistica->setChecked(true);
+
 
     // Conexiones perfil (page_usuario)
     connect(ui->Btn_Avatar, &QPushButton::clicked, this, &MainWindow::onEditAvatar);
@@ -145,6 +159,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_2->setChecked(true);
 
     connect(ui->btnBack1, &QToolButton::clicked, this, &MainWindow::back);
+    connect(ui->btnBack3, &QToolButton::clicked, this, &MainWindow::back);
+    connect(ui->dateFilter, &QDateEdit::dateChanged, this, &MainWindow::onDateFilterChanged);
+    connect(ui->btnVerEstadistica, &QPushButton::clicked, this, &MainWindow::onEstadistica);
 
     connect(ui->btnShowPassword, &QToolButton::toggled,
             this, &MainWindow::onTogglePassword);
@@ -207,6 +224,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // --- Conexiones problemas ---
     connect(ui->btnBack2, &QToolButton::clicked, this, &MainWindow::back);
+
+    connect(ui->dateFilter, &QDateEdit::dateChanged, this, &MainWindow::onDateFilterChanged);
 
     // Agrupar radio buttons
     QButtonGroup *grp = new QButtonGroup(this);
@@ -480,8 +499,7 @@ void MainWindow::onSaveProfile()
         nav.updateUser(updatedUser);
         nav.dao().updateUser(updatedUser);
 
-        QMessageBox::information(this, "Éxito",
-                                 "Perfil actualizado correctamente.");
+
 
         // Limpiar campo contraseña (buena práctica)
         ui->line_contra->clear();
@@ -654,7 +672,13 @@ void MainWindow::on_btnCorregir_clicked()
     }
 
     // Comprobar respuesta
-    if (selected == m_correctAnswerIndex)
+    bool isCorrect = (selected == m_correctAnswerIndex);
+    
+    // Save attempt for statistics
+    int currentProblemIndex = ui->comboBox->currentIndex();
+    saveProblemAttempt(currentProblemIndex, isCorrect);
+
+    if (isCorrect)
     {
         QMessageBox::information(this, "Correcto", "¡Respuesta correcta!");
         m_sessionHits++;
@@ -1669,4 +1693,288 @@ void MainWindow::onAnswerSelected()
     // Habilitar el botón cuando haya alguna opción marcada. La comprobación de validez
     // de la pregunta se hace al pulsar "Corregir".
     ui->btnCorregir->setEnabled(anyChecked);
+}
+
+// ==========================================================
+//     ESTADÍSTICAS
+// ==========================================================
+
+void MainWindow::onEstadistica()
+{
+    if (!m_isLogged) {
+        QMessageBox::information(this, "Información", "Debes iniciar sesión para ver tus estadísticas.");
+        return;
+    }
+
+    ui->stackedWidget->setCurrentWidget(ui->page_estadistica);
+
+    // --- Mejoras visuales para la tabla ---
+    ui->tableStats->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableStats->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents); // Fecha más ancha
+    ui->tableStats->verticalHeader()->setVisible(false);
+    ui->tableStats->setAlternatingRowColors(true);
+    ui->tableStats->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableStats->setShowGrid(false); // Aspecto más limpio
+
+    // Hoja de estilos para un diseño moderno y descansado para la vista
+    QString tableStyle = R"(
+        QTableWidget {
+            background-color: #FFFFFF;
+            alternate-background-color: #F9FAFB;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            gridline-color: transparent;
+        }
+        QTableWidget::item {
+            padding: 8px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+        QTableWidget::item:selected {
+            background-color: #E3F2FD;
+            color: #000000;
+        }
+        QHeaderView::section {
+            background-color: #F3F4F6;
+            color: #374151;
+            padding: 10px;
+            border: none;
+            border-bottom: 2px solid #E5E7EB;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    )";
+    ui->tableStats->setStyleSheet(tableStyle);
+
+    // Set date filter to today by default
+    ui->dateFilter->setDate(QDate::currentDate());
+
+    // Populate problem combo if empty
+    if (ui->comboProblemSelect->count() == 0) {
+        auto &nav = Navigation::instance();
+        int n = nav.problems().size();
+        for (int i = 0; i < n; ++i) {
+            ui->comboProblemSelect->addItem("Problema " + QString::number(i + 1));
+        }
+        
+        // Connect signals only once
+        connect(ui->comboStatsMode, QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                this, &MainWindow::onStatsModeChanged);
+        connect(ui->comboProblemSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                this, &MainWindow::onProblemSelectChanged);
+    }
+    
+    // Reset to session mode
+    ui->comboStatsMode->setCurrentIndex(0);
+    onStatsModeChanged(0);
+
+    QList<int> sizes;
+    sizes << 150 << 400;
+    ui->splitter->setSizes(sizes);
+}
+
+void MainWindow::onDateFilterChanged(const QDate &date)
+{
+    if (ui->comboStatsMode->currentIndex() == 0) {
+        updateStatisticsTable(date);
+    }
+}
+
+void MainWindow::updateStatisticsTable(const QDate &filterDate)
+{
+    ui->tableStats->setRowCount(0);
+
+    if (!m_isLogged) return;
+
+    // Get sessions
+    QVector<Session> sessions = m_loggedUser.sessions();
+
+    // Filter by date
+    QVector<Session> filteredSessions;
+    for (const auto &s : sessions) {
+        if (s.timeStamp().date() >= filterDate) {
+            filteredSessions.append(s);
+        }
+    }
+
+    // Sort by time descending
+    std::sort(filteredSessions.begin(), filteredSessions.end(), [](const Session &a, const Session &b){
+        return a.timeStamp() > b.timeStamp();
+    });
+
+    // Deduplicate by timestamp (keep only the latest entry for a given timestamp)
+    // Since it's sorted descending, we can just iterate and skip if timestamp is same as previous
+    QVector<Session> uniqueSessions;
+    if (!filteredSessions.isEmpty()) {
+        uniqueSessions.append(filteredSessions.first());
+        for (int i = 1; i < filteredSessions.size(); ++i) {
+            // If timestamp is different (ignoring milliseconds if needed, but exact match is safer for now)
+            if (filteredSessions[i].timeStamp() != filteredSessions[i-1].timeStamp()) {
+                uniqueSessions.append(filteredSessions[i]);
+            }
+        }
+    }
+    
+    // Populate table
+    ui->tableStats->setRowCount(uniqueSessions.size());
+    int totalHits = 0;
+    int totalFaults = 0;
+
+    for (int i = 0; i < uniqueSessions.size(); ++i) {
+        const Session &s = uniqueSessions[i];
+        
+        QTableWidgetItem *itemTime = new QTableWidgetItem(s.timeStamp().toString("HH:mm:ss"));
+        QTableWidgetItem *itemHits = new QTableWidgetItem(QString::number(s.hits()));
+        QTableWidgetItem *itemFaults = new QTableWidgetItem(QString::number(s.faults()));
+
+        // Center align
+        itemTime->setTextAlignment(Qt::AlignCenter);
+        itemHits->setTextAlignment(Qt::AlignCenter);
+        itemFaults->setTextAlignment(Qt::AlignCenter);
+
+        // Color coding
+        itemTime->setForeground(QBrush(Qt::black)); // Black for time
+        itemHits->setForeground(QBrush(QColor(0, 128, 0))); // Green
+        itemFaults->setForeground(QBrush(QColor(200, 0, 0))); // Red
+
+        ui->tableStats->setItem(i, 0, itemTime);
+        ui->tableStats->setItem(i, 1, itemHits);
+        ui->tableStats->setItem(i, 2, itemFaults);
+
+        totalHits += s.hits();
+        totalFaults += s.faults();
+    }
+
+    // Update totals labels
+    ui->lblTotalAciertos->setText(QString::number(totalHits));
+    ui->lblTotalFallos->setText(QString::number(totalFaults));
+    
+    // Style totals
+    ui->lblTotalAciertos->setStyleSheet("color: green; font-weight: bold; font-size: 14px;");
+    ui->lblTotalFallos->setStyleSheet("color: red; font-weight: bold; font-size: 14px;");
+}
+
+void MainWindow::saveProblemAttempt(int problemIndex, bool correct)
+{
+    if (!m_isLogged) return;
+
+    QString path = "problem_stats.json";
+    QFile file(path);
+    QJsonObject root;
+
+    if (file.open(QIODevice::ReadOnly)) {
+        root = QJsonDocument::fromJson(file.readAll()).object();
+        file.close();
+    }
+
+    QJsonObject userObj = root[m_loggedUser.nickName()].toObject();
+    QString probKey = QString::number(problemIndex);
+    QJsonArray attempts = userObj[probKey].toArray();
+
+    QJsonObject attempt;
+    attempt["ts"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+    attempt["correct"] = correct;
+    attempts.append(attempt);
+
+    userObj[probKey] = attempts;
+    root[m_loggedUser.nickName()] = userObj;
+
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(root).toJson());
+    }
+}
+
+QVector<MainWindow::ProblemAttempt> MainWindow::loadProblemAttempts(const QString &username, int problemIndex)
+{
+    QVector<ProblemAttempt> result;
+    QString path = "problem_stats.json";
+    QFile file(path);
+    
+    if (!file.open(QIODevice::ReadOnly)) return result;
+
+    QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    QJsonObject userObj = root[username].toObject();
+    QJsonArray attempts = userObj[QString::number(problemIndex)].toArray();
+
+    for (const auto &val : attempts) {
+        QJsonObject obj = val.toObject();
+        ProblemAttempt pa;
+        pa.timestamp = QDateTime::fromString(obj["ts"].toString(), Qt::ISODate);
+        pa.correct = obj["correct"].toBool();
+        result.append(pa);
+    }
+    return result;
+}
+
+void MainWindow::onStatsModeChanged(int index)
+{
+    // 0: Por Sesiones, 1: Por Problema
+    bool isProblemMode = (index == 1);
+    ui->comboProblemSelect->setEnabled(isProblemMode);
+    ui->dateFilter->setEnabled(!isProblemMode);
+    
+    // Update table headers
+    ui->tableStats->clearContents();
+    ui->tableStats->setRowCount(0);
+    
+    QStringList headers;
+    if (isProblemMode) {
+        headers << "Fecha y Hora" << "Resultado" << "";
+    } else {
+        headers << "Fecha y Hora" << "Aciertos" << "Fallos";
+    }
+    ui->tableStats->setHorizontalHeaderLabels(headers);
+
+    // Trigger update
+    if (isProblemMode) {
+        onProblemSelectChanged(ui->comboProblemSelect->currentIndex());
+    } else {
+        updateStatisticsTable(ui->dateFilter->date());
+    }
+}
+
+void MainWindow::onProblemSelectChanged(int index)
+{
+    if (ui->comboStatsMode->currentIndex() != 1) return;
+    
+    QVector<ProblemAttempt> attempts = loadProblemAttempts(m_loggedUser.nickName(), index);
+    
+    ui->tableStats->setRowCount(attempts.size());
+    
+    int totalHits = 0;
+    int totalFaults = 0;
+
+    // Sort by timestamp descending
+    std::sort(attempts.begin(), attempts.end(), [](const ProblemAttempt &a, const ProblemAttempt &b){
+        return a.timestamp > b.timestamp;
+    });
+
+    for (int i = 0; i < attempts.size(); ++i) {
+        const auto &att = attempts[i];
+        QTableWidgetItem *itemTime = new QTableWidgetItem(att.timestamp.toString("dd/MM/yyyy HH:mm:ss"));
+        QTableWidgetItem *itemResult = new QTableWidgetItem(att.correct ? "ACIERTO" : "FALLO");
+        
+        itemTime->setTextAlignment(Qt::AlignCenter);
+        itemResult->setTextAlignment(Qt::AlignCenter);
+        
+        itemTime->setForeground(QBrush(Qt::black)); // Black for time
+
+        if (att.correct) {
+            itemResult->setForeground(QBrush(QColor(0, 128, 0)));
+            itemResult->setFont(QFont("Segoe UI", 10, QFont::Bold));
+            totalHits++;
+        } else {
+            itemResult->setForeground(QBrush(QColor(200, 0, 0)));
+            itemResult->setFont(QFont("Segoe UI", 10, QFont::Bold));
+            totalFaults++;
+        }
+
+        ui->tableStats->setItem(i, 0, itemTime);
+        ui->tableStats->setItem(i, 1, itemResult);
+        ui->tableStats->setItem(i, 2, new QTableWidgetItem("")); // Empty column
+    }
+    
+    ui->lblTotalAciertos->setText(QString::number(totalHits));
+    ui->lblTotalFallos->setText(QString::number(totalFaults));
 }
