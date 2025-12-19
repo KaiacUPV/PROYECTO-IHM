@@ -200,24 +200,11 @@ MainWindow::MainWindow(QWidget *parent)
     loadProfileUI();
 
     // --- Small visual polish: stylesheet and avatar-radius ---
-    const QString qss = R"(
-        QMainWindow { background-color: #F3F6F8; font-family: 'Segoe UI', Arial, sans-serif; }
-        QGroupBox { background-color: #FFFFFF; border: 1px solid #E0E6ED; border-radius: 8px; padding: 8px; }
-        QToolButton { background: transparent; border-radius: 4px; padding: 2px; border: 2px solid transparent; }
-        QToolButton:hover { background-color: rgba(0,0,0,0.05); border: 2px solid rgba(25,118,210,0.15); }
-        QToolButton:checked { background-color: rgba(25,118,210,0.2); border: 2px solid #1976D2; color: #1976D2; font-weight: bold; }
-        QPushButton { background-color: #1976D2; color: white; padding: 6px 12px; border-radius: 6px; }
-        QPushButton:hover { background-color: #155fa0; }
-        QPushButton#btnguardar { background-color: #2E7D32; }
-        QPushButton#pushButton_2 { background-color: #9E9E9E; }
-        QLabel#lblUserAvatar_2 { border-radius: 40px; border: 2px solid #d0d7de; }
-        QLabel#lblUserAvatar { border-radius: 64px; border: 2px solid #d0d7de; }
-        QLabel#lblUsuario { font-weight: 600; font-size: 14px; }
-        QRadioButton::indicator { width: 18px; height: 18px; }
-        QGroupBox#groupProblems { background-color: #FFFFFF; }
-        QGroupBox#groupTools { background-color: #FFFFFF; }
-    )";
-    this->setStyleSheet(qss);
+    QFile file(":/resources/main.qss");
+    if (file.open(QFile::ReadOnly)) {
+        QString qss = QLatin1String(file.readAll());
+        this->setStyleSheet(qss);
+    }
 
     ui->lblUserAvatar_2->setScaledContents(true);
     ui->lblUserAvatar_2->setMinimumSize(80,80);
@@ -1715,37 +1702,6 @@ void MainWindow::onEstadistica()
     ui->tableStats->setAlternatingRowColors(true);
     ui->tableStats->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableStats->setShowGrid(false); // Aspecto más limpio
-
-    // Hoja de estilos para un diseño moderno y descansado para la vista
-    QString tableStyle = R"(
-        QTableWidget {
-            background-color: #FFFFFF;
-            alternate-background-color: #F9FAFB;
-            border: 1px solid #E0E0E0;
-            border-radius: 8px;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 14px;
-            gridline-color: transparent;
-        }
-        QTableWidget::item {
-            padding: 8px;
-            border-bottom: 1px solid #F0F0F0;
-        }
-        QTableWidget::item:selected {
-            background-color: #E3F2FD;
-            color: #000000;
-        }
-        QHeaderView::section {
-            background-color: #F3F4F6;
-            color: #374151;
-            padding: 10px;
-            border: none;
-            border-bottom: 2px solid #E5E7EB;
-            font-weight: bold;
-            font-size: 14px;
-        }
-    )";
-    ui->tableStats->setStyleSheet(tableStyle);
 
     // Set date filter to today by default
     ui->dateFilter->setDate(QDate::currentDate());

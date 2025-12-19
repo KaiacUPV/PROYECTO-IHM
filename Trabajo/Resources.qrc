@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>resources/carta_nautica.jpg</file>
+        <file>resources/login.qss</file>
+        <file>resources/signup.qss</file>
+        <file>resources/main.qss</file>
     </qresource>
     <qresource prefix="/icon">
         <file>resources/icons/ruler.svg</file>
