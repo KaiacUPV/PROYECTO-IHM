@@ -100,7 +100,7 @@
            <string notr="true">background-color: rgb(91, 91, 91);</string>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="page">
            <layout class="QGridLayout" name="gridLayout_6">
@@ -181,6 +181,9 @@
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="layoutDirection">
+                  <enum>Qt::LayoutDirection::LeftToRight</enum>
                  </property>
                  <property name="title">
                   <string/>
@@ -636,13 +639,6 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="btnVerEstadistica">
-               <property name="text">
-                <string>Ver Estadísticas</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="3">
               <widget class="QDateEdit" name="dateUser"/>
              </item>
@@ -763,7 +759,7 @@
              </rect>
             </property>
             <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -773,10 +769,23 @@
             </property>
             <layout class="QGridLayout" name="gridLayout_7">
              <item row="1" column="0" colspan="4">
-              <widget class="QTextEdit" name="enunciado"/>
+              <widget class="QTextEdit" name="enunciado">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0" colspan="3">
               <widget class="QGroupBox" name="groupAnswer">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="title">
                 <string/>
                </property>

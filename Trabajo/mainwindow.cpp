@@ -39,6 +39,26 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Centrar botones en los GroupBox de herramientas
+    if (ui->widgetLetras->layout()) ui->widgetLetras->layout()->setAlignment(Qt::AlignHCenter);
+    if (ui->widgetItems->layout()) ui->widgetItems->layout()->setAlignment(Qt::AlignHCenter);
+    if (ui->widgetItems_2->layout()) ui->widgetItems_2->layout()->setAlignment(Qt::AlignHCenter);
+
+    // --- CORRECCIÓN DE LAYOUTS (Page Problem & Page Usuario) ---
+    // Asignar layouts programáticamente para que el contenido se ajuste al tamaño de la ventana
+    if (!ui->page_problem->layout()) {
+        QVBoxLayout *layout = new QVBoxLayout(ui->page_problem);
+        layout->setContentsMargins(10, 10, 10, 10);
+        layout->addWidget(ui->btnBack2, 0, Qt::AlignLeft);
+        layout->addWidget(ui->groupBox);
+    }
+    if (!ui->page_usuario->layout()) {
+        QVBoxLayout *layout = new QVBoxLayout(ui->page_usuario);
+        layout->setContentsMargins(10, 10, 10, 10);
+        layout->addWidget(ui->btnBack1, 0, Qt::AlignLeft);
+        layout->addWidget(ui->groupUsuario_2);
+    }
+
     // =========================
     //   ASIGNAR ICONOS PNG
     // =========================
@@ -161,7 +181,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnBack1, &QToolButton::clicked, this, &MainWindow::back);
     connect(ui->btnBack3, &QToolButton::clicked, this, &MainWindow::back);
     connect(ui->dateFilter, &QDateEdit::dateChanged, this, &MainWindow::onDateFilterChanged);
-    connect(ui->btnVerEstadistica, &QPushButton::clicked, this, &MainWindow::onEstadistica);
 
     connect(ui->btnShowPassword, &QToolButton::toggled,
             this, &MainWindow::onTogglePassword);
@@ -266,6 +285,11 @@ MainWindow::MainWindow(QWidget *parent)
     // Theme toggle shortcut
     QShortcut *themeShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
     connect(themeShortcut, &QShortcut::activated, this, &MainWindow::toggleTheme);
+
+    // Ajustar tamaño inicial del splitter para que el panel lateral no sea demasiado ancho
+    QList<int> sizes;
+    sizes << 150 << 100;
+    ui->splitter->setSizes(sizes);
 }
 
 QPixmap MainWindow::makeRoundedPixmap(const QPixmap &src, int diameter)
