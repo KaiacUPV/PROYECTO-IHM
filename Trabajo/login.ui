@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Formulario</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -58,7 +58,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Password</string>
+         <string>Contraseña</string>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Email / Nickname</string>
+         <string>Email / Nombre de usuario</string>
         </property>
        </widget>
       </item>
@@ -109,7 +109,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Accept</string>
+         <string>Aceptar</string>
         </property>
        </widget>
       </item>

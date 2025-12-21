@@ -211,6 +211,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Botón login
     connect(ui->btnlogin, &QToolButton::clicked, this, &MainWindow::onlogin);
 
+    // Inicializar visibilidad de botones de sesión
+    ui->btnlogin->setVisible(true);
+    ui->btnlogout->setVisible(false);
+
     // Configurar campos de usuario (readonly username, password masked)
     ui->lblUsuario->setText("Sin Usuario");
     //ui->line_contra->setEchoMode(QLineEdit::Password);
@@ -340,7 +344,8 @@ MainWindow::~MainWindow()
 void MainWindow::loadProfileUI()
 {
     if (m_isLogged) {
-        ui->lblUsuario->setText(m_loggedUser.nickName());
+// Cargar datos del perfil en la UI
+    ui->Boton_Usuario->setText(m_loggedUser.nickName());
         ui->line_email->setText(m_loggedUser.email());
 
         // Nunca mostrar contraseña
@@ -356,7 +361,7 @@ void MainWindow::loadProfileUI()
 
         currentAvatarPath = "";
     } else {
-        ui->lblUsuario->setText("Sin Usuario");
+        ui->Boton_Usuario->setText("Usuario");
         ui->line_email->clear();
         ui->line_contra->clear();
         ui->dateUser->setDate(QDate::currentDate());
@@ -817,6 +822,10 @@ void MainWindow::onLoginSuccess(const User &u)
     QList<int> sizes;
     sizes << 150 << 100;
     ui->splitter->setSizes(sizes);
+
+    // Actualizar visibilidad de botones
+    ui->btnlogin->setVisible(false);
+    ui->btnlogout->setVisible(true);
 }
 
 // NEW: logout implementation
@@ -859,6 +868,10 @@ void MainWindow::onLogout()
     currentNickName.clear();
     m_isLogged = false;
     currentAvatarPath.clear();
+
+    // Actualizar visibilidad de botones
+    ui->btnlogin->setVisible(true);
+    ui->btnlogout->setVisible(false);
 
     // Restaurar avatar por defecto y enmascarar contraseña
     updateUserAvatar();

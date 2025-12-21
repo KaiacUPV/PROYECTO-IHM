@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Formulario</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" rowspan="2" colspan="2">
@@ -31,7 +31,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Nickname</string>
+         <string>Nombre de usuario</string>
         </property>
        </widget>
       </item>
@@ -49,7 +49,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Confirm Password</string>
+         <string>Confirmar Contraseña</string>
         </property>
        </widget>
       </item>
@@ -80,7 +80,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Date of Birth</string>
+         <string>Fecha de nacimiento</string>
         </property>
        </widget>
       </item>
@@ -181,7 +181,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Password  (8 y 20 caracteres)</string>
+         <string>Contraseña  (8 y 20 caracteres)</string>
         </property>
        </widget>
       </item>
@@ -215,7 +215,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Accept</string>
+         <string>Aceptar</string>
         </property>
        </widget>
       </item>
@@ -231,12 +231,12 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>• Nombre debe contenga entre 6 y 15 caracteres o dígitos sin espacios, pudiendo
-usar guiones o sub-guiones.
-• Contraseña debe contener entre 8 y 20 caracteres, incorpora al menos una letra
-en mayúsculas y minúsculas, así como algún dígito y algún carácter especial
+      <string>• El nombre debe contener entre 6 y 15 caracteres o dígitos sin espacios, pudiendo
+usar guiones o subguiones.
+• La contraseña debe contener entre 8 y 20 caracteres, incorporar al menos una letra
+mayúscula y una minúscula, así como un dígito y un carácter especial
 (!@#$%&amp;*()-+=).
-•Usuario tenga más de 16 años.</string>
+• El usuario debe ser mayor de 16 años.</string>
      </property>
     </widget>
    </item>

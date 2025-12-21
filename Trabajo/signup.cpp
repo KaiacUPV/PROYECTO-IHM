@@ -8,6 +8,7 @@
 #include <QRegularExpression>
 #include <QDate>
 #include <QFile>
+#include <QRegularExpressionMatch>
 
 // HASH
 static QString hashPassword(const QString &password)
@@ -93,12 +94,57 @@ signup::~signup()
     delete ui;
 }
 
+bool isValidUsername(const QString &username) {
+    if (username.length() < 6 || username.length() > 15) {
+        return false;
+    }
+    if (username.contains(' ')) {
+        return false;
+    }
+    return true;
+}
+
+bool isValidPassword(const QString &password) {
+    if (password.length() < 8 || password.length() > 20) {
+        return false;
+    }
+    QRegularExpression reUpper("[A-Z]");
+    QRegularExpression reLower("[a-z]");
+    QRegularExpression reDigit("\\d");
+    QRegularExpression reSpecial("[^a-zA-Z0-9]");
+
+    if (!password.contains(reUpper)) {
+        return false;
+    }
+    if (!password.contains(reLower)) {
+        return false;
+    }
+    if (!password.contains(reDigit)) {
+        return false;
+    }
+    if (!password.contains(reSpecial)) {
+        return false;
+    }
+
+    return true;
+}
+
 void signup::onAccept()
 {
     QString nick  = ui->txt_nick->text().trimmed();
     QString email = ui->Text_Email->text().trimmed();
     QString pass1 = ui->lineEdit_2->text();
     QString pass2 = ui->lineEdit_3->text();
+
+    if (!isValidUsername(nick)) {
+        QMessageBox::warning(this, "Error de validación", "El nombre de usuario debe tener entre 6 y 15 caracteres y no contener espacios.");
+        return;
+    }
+
+    if (!isValidPassword(pass1)) {
+        QMessageBox::warning(this, "Error de validación", "La contraseña debe tener entre 8 y 20 caracteres, e incluir al menos una mayúscula, una minúscula, un dígito y un carácter especial.");
+        return;
+    }
 
     if (nick.isEmpty() || email.isEmpty() || pass1.isEmpty()) {
         QMessageBox::warning(this, "Error", "Campos obligatorios vacíos.");

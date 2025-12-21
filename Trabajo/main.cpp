@@ -6,11 +6,11 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    // Load the DB into Navigation singleton before UI shows
+    // Carga la BD en el singleton de Navegación antes de que se muestre la interfaz de usuario
     try {
         Navigation::instance().reload();
     } catch (...) {
-        // If reload fails, continue — UI can show errors where needed
+        // Si la recarga falla, continúa — la interfaz de usuario puede mostrar errores donde sea necesario
     }
 
     MainWindow w;
