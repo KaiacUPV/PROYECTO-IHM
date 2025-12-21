@@ -31,6 +31,7 @@
 
 #include "login.h"
 #include "signup.h"
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -211,6 +212,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Botón login
     connect(ui->btnlogin, &QToolButton::clicked, this, &MainWindow::onlogin);
 
+    // Botón ayuda
+    connect(ui->btnAyuda, &QToolButton::clicked, this, &MainWindow::onAyuda);
+
     // Inicializar visibilidad de botones de sesión
     ui->btnlogin->setVisible(true);
     ui->btnlogout->setVisible(false);
@@ -294,6 +298,8 @@ MainWindow::MainWindow(QWidget *parent)
     QList<int> sizes;
     sizes << 150 << 100;
     ui->splitter->setSizes(sizes);
+
+    applyKeyBindings();
 }
 
 QPixmap MainWindow::makeRoundedPixmap(const QPixmap &src, int diameter)
@@ -336,6 +342,96 @@ MainWindow::~MainWindow()
 
     delete ui;
 }
+
+void MainWindow::onAyuda()
+{
+    HelpDialog helpDialog(this);
+    helpDialog.exec();
+    applyKeyBindings();
+}
+
+void MainWindow::applyKeyBindings()
+{
+    // Clear existing shortcuts
+    qDeleteAll(m_shortcuts);
+    m_shortcuts.clear();
+
+    QSettings settings("MySoft", "NauticalChartApp");
+    settings.beginGroup("KeyBindings");
+
+    QKeySequence reglaKey = settings.value("Regla").value<QKeySequence>();
+    if (!reglaKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(reglaKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onRegla);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence transportadorKey = settings.value("Transportador").value<QKeySequence>();
+    if (!transportadorKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(transportadorKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onTransportador);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence compasKey = settings.value("Compas").value<QKeySequence>();
+    if (!compasKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(compasKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onCompas);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence puntoKey = settings.value("Punto").value<QKeySequence>();
+    if (!puntoKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(puntoKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onPunto);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence lineaKey = settings.value("Linea").value<QKeySequence>();
+    if (!lineaKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(lineaKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onLinea);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence textoKey = settings.value("Texto").value<QKeySequence>();
+    if (!textoKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(textoKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onTexto);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence colorKey = settings.value("Color").value<QKeySequence>();
+    if (!colorKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(colorKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onColor);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence borrarKey = settings.value("Borrar").value<QKeySequence>();
+    if (!borrarKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(borrarKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onBorrar);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence moverKey = settings.value("Mover").value<QKeySequence>();
+    if (!moverKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(moverKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onMover);
+        m_shortcuts.append(shortcut);
+    }
+
+    QKeySequence limpiarKey = settings.value("Limpiar").value<QKeySequence>();
+    if (!limpiarKey.isEmpty()) {
+        QShortcut *shortcut = new QShortcut(limpiarKey, this);
+        connect(shortcut, &QShortcut::activated, this, &MainWindow::onLimpiar);
+        m_shortcuts.append(shortcut);
+    }
+
+    settings.endGroup();
+}
+
 
 // ==========================================================
 //     EDICIÓN DE PERFIL
@@ -1230,49 +1326,10 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 //     ATAJOS DE TECLADO PARA HERRAMIENTAS
 // ==========================================================
 
+
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    // Atajos sin modificadores
-    switch (event->key()) {
-        case Qt::Key_R:
-            onRegla();
-            break;
-        case Qt::Key_C:
-            onCompas();
-            break;
-        case Qt::Key_L:
-            onLinea();
-            break;
-        case Qt::Key_P:
-            onPunto();
-            break;
-        case Qt::Key_T:
-            onTexto();
-            break;
-        case Qt::Key_B:
-            onBorrar();
-            break;
-        case Qt::Key_Delete:
-            onLimpiar();
-            break;
-        default:
-            break;
-    }
-
-    // Atajos con Shift
-    if (event->modifiers() & Qt::ShiftModifier) {
-        switch (event->key()) {
-            case Qt::Key_T:
-                onTransportador();
-                break;
-            case Qt::Key_C:
-                onColor();
-                break;
-            default:
-                break;
-        }
-    }
-
     // Llamar al handler base para otros eventos
     QMainWindow::keyPressEvent(event);
 }
@@ -1442,19 +1499,18 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 // ======================================================
                 if (currentTool == TOOL_TEXTO)
                 {
-                    QString t = QInputDialog::getText(this, "Texto", "Introduce texto:");
-                    if (!t.isEmpty())
-                    {
-                        QGraphicsTextItem *txtItem = scene->addText(t);
-                        txtItem->setDefaultTextColor(activeColor);
-
-                        QFont f = txtItem->font();
-                        f.setPointSize(activeFontSize);
-                        txtItem->setFont(f);
-
-                        txtItem->setPos(p);
+                    // Si hacemos clic en un texto existente, no empezamos a dibujar uno nuevo
+                    QGraphicsItem *item = scene->itemAt(p, view->transform());
+                    if (item && item->type() == QGraphicsTextItem::Type) {
+                         // Permitir que el evento continúe para la selección/movimiento
+                    } else {
+                        drawingTextBox = true;
+                        textBoxStartPoint = p;
+                        tempTextBox = new QGraphicsRectItem(QRectF(p, p));
+                        tempTextBox->setPen(QPen(Qt::DashLine)); // Estilo visual para el cuadro temporal
+                        scene->addItem(tempTextBox);
+                        return true;
                     }
-                    return true;
                 }
 
                 // ======================================================
@@ -1562,6 +1618,32 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
                     return true;
                 }
+
+                // Desactivar la edición de cualquier otro texto si se hace clic en otro lugar
+                for (QGraphicsItem *item : scene->items()) {
+                    if (item && item->type() == QGraphicsTextItem::Type) {
+                        auto* textItem = qgraphicsitem_cast<QGraphicsTextItem*>(item);
+                        if (textItem->textInteractionFlags() == Qt::TextEditorInteraction) {
+                            textItem->setTextInteractionFlags(Qt::NoTextInteraction);
+                            textItem->clearFocus();
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        //                ARRASTRAR CUADRO DE TEXTO (mientras se dibuja)
+        // ============================================================
+        if (event->type() == QEvent::MouseMove && drawingTextBox)
+        {
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
+            QPointF currentPos = view->mapToScene(e->pos());
+            if (tempTextBox) {
+                // Usar normalized() para asegurar que el rectángulo tenga ancho y alto positivos
+                QRectF rect(textBoxStartPoint, currentPos);
+                tempTextBox->setRect(rect.normalized());
+                return true;
             }
         }
 
@@ -1654,11 +1736,81 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
 
 
-        if (event->type() == QEvent::MouseButtonRelease && drawingLine)
+        if (event->type() == QEvent::MouseButtonRelease)
         {
-            drawingLine = false;
-            tempLine = nullptr;
-            return true;
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
+            if (e->button() == Qt::LeftButton)
+            {
+                if (drawingLine)
+                {
+                    drawingLine = false;
+                    tempLine = nullptr; // El objeto se queda en la escena, solo limpiamos el puntero temporal
+                    return true;
+                }
+
+                if (drawingTextBox)
+                {
+                    drawingTextBox = false;
+                    if (tempTextBox)
+                    {
+                        QRectF finalRect = tempTextBox->rect();
+                        scene->removeItem(tempTextBox);
+                        delete tempTextBox;
+                        tempTextBox = nullptr;
+
+                        if (finalRect.width() > 5 && finalRect.height() > 5) // Evitar cuadros demasiado pequeños
+                        {
+                            QString t = QInputDialog::getText(this, "Texto", "Introduce texto:");
+                            if (!t.isEmpty())
+                            {
+                                QGraphicsTextItem *txtItem = scene->addText(t);
+                                txtItem->setDefaultTextColor(activeColor);
+                                txtItem->setTextWidth(finalRect.width()); // Ajustar ancho para auto-wrap
+
+                                QFont f = txtItem->font();
+                                f.setPointSize(activeFontSize);
+                                txtItem->setFont(f);
+
+                                txtItem->setPos(finalRect.topLeft());
+
+                                // --- Habilitar edición y selección ---
+                                txtItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
+                                txtItem->setFlag(QGraphicsItem::ItemIsMovable, true);
+                                txtItem->setFlag(QGraphicsItem::ItemIsFocusable, true);
+                                txtItem->setTextInteractionFlags(Qt::NoTextInteraction); // Editable solo con doble clic
+                            }
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+
+        if (event->type() == QEvent::MouseButtonDblClick)
+        {
+            QMouseEvent *e = static_cast<QMouseEvent*>(event);
+            if (e->button() == Qt::LeftButton)
+            {
+                QPointF p = view->mapToScene(e->pos());
+                QGraphicsItem *item = scene->itemAt(p, view->transform());
+                if (item && item->type() == QGraphicsTextItem::Type)
+                {
+                    QGraphicsTextItem *txtItem = qgraphicsitem_cast<QGraphicsTextItem*>(item);
+                    if (txtItem)
+                    {
+                        // Activar modo de edición
+                        txtItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+                        txtItem->setFocus(Qt::MouseFocusReason);
+
+                        // Seleccionar todo el texto para una edición rápida
+                        QTextCursor cursor = txtItem->textCursor();
+                        cursor.select(QTextCursor::Document);
+                        txtItem->setTextCursor(cursor);
+
+                        return true;
+                    }
+                }
+            }
         }
 
         // --- Botón derecho soltado ---

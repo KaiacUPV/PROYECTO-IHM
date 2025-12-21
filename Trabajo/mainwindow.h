@@ -15,12 +15,14 @@
 #include <QLabel>
 #include <QColor>
 #include <QPointF>
+#include <QShortcut>
 
 #include <QGraphicsSvgItem>
 #include <QSvgRenderer>
 
 #include "tool.h"
 #include "navigation.h"
+#include "helpdialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -51,6 +53,7 @@ private slots:
     void onLoginSuccess(const User &u);
     void back();
     void onTogglePassword(bool checked);
+    void onAyuda();
 
     // Problemas
     void initializeProblems();
@@ -77,6 +80,9 @@ private slots:
     void onRegla();
     void onCompas();
     void onTransportador();
+
+private slots:
+    void applyKeyBindings();
 
 private:
     void loadCarta();
@@ -113,6 +119,7 @@ private:
     int m_sessionHits = 0;
     int m_sessionFaults = 0;
     Session m_currentSession;
+    QList<QShortcut *> m_shortcuts;
 
     // Graphics / tools
     double zoomLevel = 1.0;
@@ -125,6 +132,9 @@ private:
     QGraphicsLineItem *tempLine = nullptr;
     bool drawingLine = false;
     QPointF lineStart;
+    QGraphicsRectItem *tempTextBox = nullptr;
+    bool drawingTextBox = false;
+    QPointF textBoxStartPoint;
     QColor activeColor = Qt::black;
     int activeWidth = 2;
     int activeFontSize = 12;

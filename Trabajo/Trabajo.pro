@@ -6,7 +6,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     signup.cpp \
-    tool.cpp
+    tool.cpp \
+    helpdialog.cpp
 
 HEADERS += \
     lib/include/navdaoexception.h \
@@ -17,12 +18,14 @@ HEADERS += \
     mainwindow.h \
     signup.h \
     tool.h \
-    usuario.h
+    usuario.h \
+    helpdialog.h
 
 FORMS += \
     login.ui \
     mainwindow.ui \
-    signup.ui
+    signup.ui \
+    helpdialog.ui
 
 # Agregar esta línea (muy importante)
 INCLUDEPATH += $$PWD/lib/include
