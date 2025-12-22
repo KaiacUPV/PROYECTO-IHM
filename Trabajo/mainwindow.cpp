@@ -234,7 +234,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     ui->lblUserAvatar_2->setScaledContents(true);
-    ui->lblUserAvatar_2->setMinimumSize(80,80);
+    ui->lblUserAvatar_2->setMinimumSize(100,100);
 
     // --- Conexiones problemas ---
     connect(ui->btnBack2, &QToolButton::clicked, this, &MainWindow::back);
@@ -440,8 +440,9 @@ void MainWindow::applyKeyBindings()
 void MainWindow::loadProfileUI()
 {
     if (m_isLogged) {
-// Cargar datos del perfil en la UI
-    ui->Boton_Usuario->setText(m_loggedUser.nickName());
+        // Cargar datos del perfil en la UI
+        ui->Boton_Usuario->setText(m_loggedUser.nickName());
+        ui->lblUsuario->setText(m_loggedUser.nickName()); // Fix: Update profile label
         ui->line_email->setText(m_loggedUser.email());
 
         // Nunca mostrar contraseña
@@ -453,17 +454,18 @@ void MainWindow::loadProfileUI()
 
         QPixmap pixmap = QPixmap::fromImage(m_loggedUser.avatar());
         setCircularLabel(ui->lblUserAvatar_2,
-                         makeRoundedPixmap(pixmap, 80), 80);
+                         makeRoundedPixmap(pixmap, 100), 100); // Fix: Size 100
 
         currentAvatarPath = "";
     } else {
         ui->Boton_Usuario->setText("Usuario");
+        ui->lblUsuario->setText("Sin Usuario"); // Fix: Reset profile label
         ui->line_email->clear();
         ui->line_contra->clear();
         ui->dateUser->setDate(QDate::currentDate());
 
         ui->lblUserAvatar_2->setPixmap(
-            makeRoundedPixmap(QPixmap(":/icon/resources/icons/perfil.jpg"), 80)
+            makeRoundedPixmap(QPixmap(":/icon/resources/icons/perfil.jpg"), 100) // Fix: Size 100
             );
 
         ui->line_contra->setEchoMode(QLineEdit::Password);
@@ -1357,11 +1359,11 @@ void MainWindow::applyZoom(double factor)
 Tool *MainWindow::findNearestPlacedTool(const QPointF &scenePoint)
 {
     // 1. Prioritize tool under cursor (allows drawing "on" the tool regardless of zoom)
-    if (regla && regla->isPlaced() && regla->contains(regla->mapFromScene(scenePoint)))
+    if (regla && regla->isVisible() && regla->isPlaced() && regla->contains(regla->mapFromScene(scenePoint)))
         return regla;
-    if (transportador && transportador->isPlaced() && transportador->contains(transportador->mapFromScene(scenePoint)))
+    if (transportador && transportador->isVisible() && transportador->isPlaced() && transportador->contains(transportador->mapFromScene(scenePoint)))
         return transportador;
-    if (compas && compas->isPlaced() && compas->contains(compas->mapFromScene(scenePoint)))
+    if (compas && compas->isVisible() && compas->isPlaced() && compas->contains(compas->mapFromScene(scenePoint)))
         return compas;
 
     // 2. Fallback to closest edge
@@ -1369,7 +1371,7 @@ Tool *MainWindow::findNearestPlacedTool(const QPointF &scenePoint)
     double bestDist = std::numeric_limits<double>::infinity();
 
     auto checkTool = [&](Tool *tool) {
-        if (!tool || !tool->isPlaced()) return;
+        if (!tool || !tool->isVisible() || !tool->isPlaced()) return;
         QPointF proj = tool->projectPoint(scenePoint, Tool::EdgeTop);
         double d = QLineF(scenePoint, proj).length();
         if (d < bestDist) { bestDist = d; best = tool; }
