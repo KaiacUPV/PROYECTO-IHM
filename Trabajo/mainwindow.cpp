@@ -291,8 +291,8 @@ MainWindow::MainWindow(QWidget *parent)
     toolButtons->addButton(ui->btnTransportador);
 
     // Theme toggle shortcut
-    QShortcut *themeShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
-    connect(themeShortcut, &QShortcut::activated, this, &MainWindow::toggleTheme);
+    // QShortcut *themeShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
+    // connect(themeShortcut, &QShortcut::activated, this, &MainWindow::toggleTheme);
 
     // Ajustar tamaño inicial del splitter para que el panel lateral no sea demasiado ancho
     QList<int> sizes;

@@ -1,5 +1,5 @@
 QWidget {
-    background-color: #1E1E1E;
+    background-color: #2B2B2B;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
     color: #E0E0E0;
@@ -7,7 +7,7 @@ QWidget {
 
 /* Campos de texto */
 QLineEdit {
-    background-color: #2C2C2E; /* Apple Dark Gray */
+    background-color: #252525; /* Apple Dark Gray */
     border: 1px solid #3A3A3C;
     border-radius: 10px;       /* Rounded corners */
     padding: 10px 12px;
