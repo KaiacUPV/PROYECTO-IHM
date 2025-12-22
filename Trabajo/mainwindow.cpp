@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     //   ASIGNAR ICONOS PNG
     // =========================
 
-    QSize iconSize(32, 32);
+    QSize iconSize(48, 48);
 
     // --- Herramientas ---
     ui->btnTexto->setIcon(QIcon(":/icon/resources/icons/texto.png"));
@@ -227,7 +227,7 @@ MainWindow::MainWindow(QWidget *parent)
     loadProfileUI();
 
     // --- Small visual polish: stylesheet and avatar-radius ---
-    QFile file(":/resources/main.qss");
+    QFile file(":/resources/new_style.qss");
     if (file.open(QFile::ReadOnly)) {
         QString qss = QLatin1String(file.readAll());
         this->setStyleSheet(qss);
