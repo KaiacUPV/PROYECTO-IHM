@@ -79,13 +79,6 @@ signup::signup(QWidget *parent)
     ui->btnShowPass2->setAutoRaise(true);
 
     setWindowTitle("Carta Náutica - Registrarse");
-
-    // --- ESTILO VISUAL MEJORADO (QSS - APPLE STYLE DARK) ---
-    QFile file(":/resources/signup.qss");
-    if (file.open(QFile::ReadOnly)) {
-        QString qss = QLatin1String(file.readAll());
-        this->setStyleSheet(qss);
-    }
 }
 
 

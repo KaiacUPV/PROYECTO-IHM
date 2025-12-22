@@ -16,6 +16,8 @@
 #include <QColor>
 #include <QPointF>
 #include <QShortcut>
+#include <QToolButton>
+#include <QResizeEvent>
 
 #include <QGraphicsSvgItem>
 #include <QSvgRenderer>
@@ -39,6 +41,7 @@ public:
 protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
@@ -66,6 +69,7 @@ private slots:
     void onDateFilterChanged(const QDate &date);
     void onStatsModeChanged(int index);
     void onProblemSelectChanged(int index);
+    void onSplitterMoved(int pos, int index);
 
     // Herramientas
     void onTexto();
@@ -94,6 +98,7 @@ private:
     bool validatePassword(const QString &password);
     void loadProfileUI();
     void updateStatisticsTable(const QDate &filterDate);
+    void updateToggleButtons();
 
     struct ProblemAttempt {
         QDateTime timestamp;
@@ -110,6 +115,10 @@ private:
     QGraphicsScene *scene;
     QGraphicsView *view;
     QPixmap cartaPixmap;
+
+    // Side panel toggles
+    QToolButton *btnExpandLeft;
+    QToolButton *btnExpandRight;
 
     // Session / user
     User m_loggedUser;

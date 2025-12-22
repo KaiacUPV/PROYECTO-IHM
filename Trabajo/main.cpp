@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     // Cargar hoja de estilos global
-    QFile file(":/resources/main.qss");
+    QFile file(":/resources/new_style.qss");
     if (file.open(QFile::ReadOnly)) {
         QString styleSheet = QLatin1String(file.readAll());
         a.setStyleSheet(styleSheet);

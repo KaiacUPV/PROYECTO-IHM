@@ -40,94 +40,122 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Configurar el splitter principal (Izquierda: Navegación, Centro: Mapa, Derecha: Herramientas)
+    ui->splitter->setStretchFactor(0, 0); // Navegación (fijo)
+    ui->splitter->setStretchFactor(1, 1); // Mapa (expandible)
+    ui->splitter->setStretchFactor(2, 0); // Herramientas (fijo)
+    ui->splitter->setSizes({250, 650, 100});
+
+    // Botones de expansión (flechas) que aparecen cuando se cierran los paneles
+    btnExpandLeft = new QToolButton(ui->centralwidget);
+    btnExpandLeft->setObjectName("btnExpandLeft");
+    btnExpandLeft->setText("▶");
+    btnExpandLeft->setCursor(Qt::PointingHandCursor);
+    btnExpandLeft->setVisible(false);
+
+    btnExpandRight = new QToolButton(ui->centralwidget);
+    btnExpandRight->setObjectName("btnExpandRight");
+    btnExpandRight->setText("◀");
+    btnExpandRight->setCursor(Qt::PointingHandCursor);
+    btnExpandRight->setVisible(false);
+
+    connect(btnExpandLeft, &QToolButton::clicked, this, [this](){
+        QList<int> s = ui->splitter->sizes();
+        s[0] = 250;
+        if (s[1] > 250) s[1] -= 250;
+        ui->splitter->setSizes(s);
+        updateToggleButtons();
+    });
+    connect(btnExpandRight, &QToolButton::clicked, this, [this](){
+        QList<int> s = ui->splitter->sizes();
+        s[2] = 150;
+        if (s[1] > 150) s[1] -= 150;
+        ui->splitter->setSizes(s);
+        updateToggleButtons();
+    });
+
+    connect(ui->splitter, &QSplitter::splitterMoved, this, &MainWindow::onSplitterMoved);
+
     // Centrar botones en los GroupBox de herramientas
     if (ui->widgetLetras->layout()) ui->widgetLetras->layout()->setAlignment(Qt::AlignHCenter);
     if (ui->widgetItems->layout()) ui->widgetItems->layout()->setAlignment(Qt::AlignHCenter);
     if (ui->widgetItems_2->layout()) ui->widgetItems_2->layout()->setAlignment(Qt::AlignHCenter);
 
-    // --- CORRECCIÓN DE LAYOUTS (Page Problem & Page Usuario) ---
-    // Asignar layouts programáticamente para que el contenido se ajuste al tamaño de la ventana
-    if (!ui->page_problem->layout()) {
-        QVBoxLayout *layout = new QVBoxLayout(ui->page_problem);
-        layout->setContentsMargins(10, 10, 10, 10);
-        layout->addWidget(ui->btnBack2, 0, Qt::AlignLeft);
-        layout->addWidget(ui->groupBox);
-    }
-    if (!ui->page_usuario->layout()) {
-        QVBoxLayout *layout = new QVBoxLayout(ui->page_usuario);
-        layout->setContentsMargins(10, 10, 10, 10);
-        layout->addWidget(ui->btnBack1, 0, Qt::AlignLeft);
-        layout->addWidget(ui->groupUsuario_2);
-    }
+    // --- MEJORAS VISUALES (Gestalt: Closure & Proximity) ---
+    ui->groupUsuario->setTitle("SESIÓN");
+    ui->groupProblems->setTitle("NAVEGACIÓN");
+    ui->groupTools->setTitle("HERRAMIENTAS");
+    ui->widgetLetras->setTitle("Dibujo");
+    ui->widgetItems_2->setTitle("Instrumentos");
+    ui->widgetItems->setTitle("Vista");
+
+    // Tooltips para mejor UX
+    ui->btnTexto->setToolTip("Añadir texto a la carta");
+    ui->btnPunto->setToolTip("Marcar un punto");
+    ui->btnLinea->setToolTip("Dibujar una línea");
+    ui->btnColor->setToolTip("Cambiar color de trazo");
+    ui->btnRegla->setToolTip("Usar regla");
+    ui->btnCompas->setToolTip("Usar compás");
+    ui->btnTransportador->setToolTip("Usar transportador");
+    ui->btnZoomIn->setToolTip("Aumentar zoom");
+    ui->btnZoomOut->setToolTip("Reducir zoom");
+    ui->btnMover->setToolTip("Mover elementos");
+    ui->btnBorrar->setToolTip("Borrar elemento");
+    ui->btnLimpiar->setToolTip("Limpiar toda la carta");
 
     // =========================
     //   ASIGNAR ICONOS PNG
     // =========================
 
-    QSize iconSize(48, 48);
+    QSize iconSize(52, 52);
 
     // --- Herramientas ---
     ui->btnTexto->setIcon(QIcon(":/icon/resources/icons/texto.png"));
-    ui->btnTexto->setChecked(true);
     ui->btnTexto->setIconSize(iconSize);
 
-    ui->btnColor->setIcon(QIcon(":icon/resources/icons/color.png"));
-    ui->btnColor->setChecked(true);
+    ui->btnColor->setIcon(QIcon(":/icon/resources/icons/color.png"));
     ui->btnColor->setIconSize(iconSize);
 
-    ui->btnLinea->setIcon(QIcon(":icon/resources/icons/linea.png"));
-    ui->btnLinea->setChecked(true);
+    ui->btnLinea->setIcon(QIcon(":/icon/resources/icons/linea.png"));
     ui->btnLinea->setIconSize(iconSize);
 
-    ui->btnPunto->setIcon(QIcon(":icon/resources/icons/punto.png"));
-    ui->btnPunto->setChecked(true);
+    ui->btnPunto->setIcon(QIcon(":/icon/resources/icons/punto.png"));
     ui->btnPunto->setIconSize(iconSize);
 
     // --- Configuración ---
-    ui->btnLimpiar->setIcon(QIcon(":icon/resources/icons/limpiar.png"));
-    ui->btnLimpiar->setChecked(true);
+    ui->btnLimpiar->setIcon(QIcon(":/icon/resources/icons/limpiar.png"));
     ui->btnLimpiar->setIconSize(iconSize);
 
-    ui->btnBorrar->setIcon(QIcon(":icon/resources/icons/borrar.png"));
-    ui->btnBorrar->setChecked(true);
+    ui->btnBorrar->setIcon(QIcon(":/icon/resources/icons/borrar.png"));
     ui->btnBorrar->setIconSize(iconSize);
 
-    ui->btnMover->setIcon(QIcon(":icon/resources/icons/mover.png"));
-    ui->btnMover->setChecked(true);
+    ui->btnMover->setIcon(QIcon(":/icon/resources/icons/mover.png"));
     ui->btnMover->setIconSize(iconSize);
 
-    ui->btnZoomIn->setIcon(QIcon(":icon/resources/icons/zoom_in.png"));
-    ui->btnZoomIn->setChecked(true);
+    ui->btnZoomIn->setIcon(QIcon(":/icon/resources/icons/zoom_in.png"));
     ui->btnZoomIn->setIconSize(iconSize);
 
-    ui->btnZoomOut->setIcon(QIcon(":icon/resources/icons/zoom_out.png"));
-    ui->btnZoomOut->setChecked(true);
+    ui->btnZoomOut->setIcon(QIcon(":/icon/resources/icons/zoom_out.png"));
     ui->btnZoomOut->setIconSize(iconSize);
 
     // --- Herramientas especiales ---
-    ui->btnRegla->setIcon(QIcon(":icon/resources/icons/regla.png"));
-    ui->btnRegla->setChecked(true);
+    ui->btnRegla->setIcon(QIcon(":/icon/resources/icons/regla.png"));
     ui->btnRegla->setIconSize(iconSize);
 
-    ui->btnTransportador->setIcon(QIcon(":icon/resources/icons/transportador.png"));
-    ui->btnTransportador->setChecked(true);
+    ui->btnTransportador->setIcon(QIcon(":/icon/resources/icons/transportador.png"));
     ui->btnTransportador->setIconSize(iconSize);
 
-    ui->btnCompas->setIcon(QIcon(":icon/resources/icons/compas.png"));
-    ui->btnCompas->setChecked(true);
+    ui->btnCompas->setIcon(QIcon(":/icon/resources/icons/compas.png"));
     ui->btnCompas->setIconSize(iconSize);
 
     // --- Botones de volver ---
-    ui->btnBack1->setIcon(QIcon(":icon/resources/icons/back.png"));
-    ui->btnBack1->setChecked(true);
+    ui->btnBack1->setIcon(QIcon(":/icon/resources/icons/back.png"));
     ui->btnBack1->setIconSize(iconSize);
 
-    ui->btnBack2->setIcon(QIcon(":icon/resources/icons/back.png"));
-    ui->btnBack2->setChecked(true);
+    ui->btnBack2->setIcon(QIcon(":/icon/resources/icons/back.png"));
     ui->btnBack2->setIconSize(iconSize);
 
-    ui->btnBack3->setIcon(QIcon(":icon/resources/icons/back.png"));
-    ui->btnBack3->setChecked(true);
+    ui->btnBack3->setIcon(QIcon(":/icon/resources/icons/back.png"));
     ui->btnBack3->setIconSize(iconSize);
 
     // === Insertar el QGraphicsView dentro del mapwidget ===
@@ -211,6 +239,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Botón login
     connect(ui->btnlogin, &QToolButton::clicked, this, &MainWindow::onlogin);
+    ui->btnlogin->setProperty("class", "loginButton");
 
     // Botón ayuda
     connect(ui->btnAyuda, &QToolButton::clicked, this, &MainWindow::onAyuda);
@@ -218,6 +247,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Inicializar visibilidad de botones de sesión
     ui->btnlogin->setVisible(true);
     ui->btnlogout->setVisible(false);
+    ui->Boton_Usuario->setVisible(false);
 
     // Configurar campos de usuario (readonly username, password masked)
     ui->lblUsuario->setText("Sin Usuario");
@@ -225,13 +255,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Inicializar datos de usuario (por defecto)
     loadProfileUI();
-
-    // --- Small visual polish: stylesheet and avatar-radius ---
-    QFile file(":/resources/new_style.qss");
-    if (file.open(QFile::ReadOnly)) {
-        QString qss = QLatin1String(file.readAll());
-        this->setStyleSheet(qss);
-    }
 
     ui->lblUserAvatar_2->setScaledContents(true);
     ui->lblUserAvatar_2->setMinimumSize(100,100);
@@ -270,25 +293,28 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Make drawing tool buttons checkable and group them for exclusive selection
     QButtonGroup *toolButtons = new QButtonGroup(this);
-    toolButtons->setExclusive(false);
+    toolButtons->setExclusive(true); // Exclusive selection for tools
     ui->btnTexto->setCheckable(true);
     ui->btnPunto->setCheckable(true);
     ui->btnLinea->setCheckable(true);
-    ui->btnColor->setCheckable(true);
     ui->btnMover->setCheckable(true);
     ui->btnBorrar->setCheckable(true);
     ui->btnRegla->setCheckable(true);
     ui->btnCompas->setCheckable(true);
     ui->btnTransportador->setCheckable(true);
+
     toolButtons->addButton(ui->btnTexto);
     toolButtons->addButton(ui->btnPunto);
     toolButtons->addButton(ui->btnLinea);
-    toolButtons->addButton(ui->btnColor);
     toolButtons->addButton(ui->btnMover);
     toolButtons->addButton(ui->btnBorrar);
     toolButtons->addButton(ui->btnRegla);
     toolButtons->addButton(ui->btnCompas);
     toolButtons->addButton(ui->btnTransportador);
+
+    // Default tool
+    ui->btnTexto->setChecked(true);
+    currentTool = TOOL_TEXTO;
 
     // Theme toggle shortcut
     // QShortcut *themeShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
@@ -296,7 +322,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Ajustar tamaño inicial del splitter para que el panel lateral no sea demasiado ancho
     QList<int> sizes;
-    sizes << 150 << 100;
+    sizes << 200 << 700 << 100;
     ui->splitter->setSizes(sizes);
 
     applyKeyBindings();
@@ -847,8 +873,9 @@ void MainWindow::onPerfil()
     loadProfileUI();
 
     QList<int> sizes;
-    sizes << 150 << 400;
+    sizes << 300 << 600 << 100;
     ui->splitter->setSizes(sizes);
+    updateToggleButtons();
 }
 
 void MainWindow::updateUserAvatar()
@@ -915,15 +942,16 @@ void MainWindow::onLoginSuccess(const User &u)
     loadProfileUI();
 
 
-    ui->stackedWidget->setCurrentWidget(ui->page);
+    ui->stackedWidget->setCurrentWidget(ui->page_nav);
 
     QList<int> sizes;
-    sizes << 150 << 100;
+    sizes << 200 << 700 << 100;
     ui->splitter->setSizes(sizes);
 
     // Actualizar visibilidad de botones
     ui->btnlogin->setVisible(false);
     ui->btnlogout->setVisible(true);
+    ui->Boton_Usuario->setVisible(true);
 }
 
 // NEW: logout implementation
@@ -970,14 +998,15 @@ void MainWindow::onLogout()
     // Actualizar visibilidad de botones
     ui->btnlogin->setVisible(true);
     ui->btnlogout->setVisible(false);
+    ui->Boton_Usuario->setVisible(false);
 
     // Restaurar avatar por defecto y enmascarar contraseña
     updateUserAvatar();
     loadProfileUI();
 
     // Volver a la página inicial
-    ui->stackedWidget->setCurrentWidget(ui->page);
-    QList<int> sizes; sizes << 150 << 100; ui->splitter->setSizes(sizes);
+    ui->stackedWidget->setCurrentWidget(ui->page_nav);
+    QList<int> sizes; sizes << 200 << 700 << 100; ui->splitter->setSizes(sizes);
 
     //QMessageBox::information(this, "Sesión cerrada", "Sesión cerrada y cambios guardados.");
 }
@@ -1001,10 +1030,10 @@ void MainWindow::back()
         m_sessionFaults = 0;
     }
 
-    ui->stackedWidget->setCurrentWidget(ui->page);
+    ui->stackedWidget->setCurrentWidget(ui->page_nav);
 
     QList<int> sizes;
-    sizes << 150 << 100;
+    sizes << 200 << 700 << 100;
     ui->splitter->setSizes(sizes);
 }
 
@@ -1031,8 +1060,9 @@ void MainWindow::onProblemas()
     ui->stackedWidget->setCurrentWidget(ui->page_problem);
 
     QList<int> sizes;
-    sizes << 150 << 400;
+    sizes << 350 << 550 << 100;
     ui->splitter->setSizes(sizes);
+    updateToggleButtons();
 }
 
 // ==========================================================
@@ -1886,6 +1916,11 @@ void MainWindow::onEstadistica()
 
     ui->stackedWidget->setCurrentWidget(ui->page_estadistica);
 
+    QList<int> sizes;
+    sizes << 400 << 500 << 100;
+    ui->splitter->setSizes(sizes);
+    updateToggleButtons();
+
     // --- Mejoras visuales para la tabla ---
     ui->tableStats->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableStats->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents); // Fecha más ancha
@@ -1915,10 +1950,6 @@ void MainWindow::onEstadistica()
     // Reset to session mode
     ui->comboStatsMode->setCurrentIndex(0);
     onStatsModeChanged(0);
-
-    QList<int> sizes;
-    sizes << 150 << 400;
-    ui->splitter->setSizes(sizes);
 }
 
 void MainWindow::onDateFilterChanged(const QDate &date)
@@ -1981,7 +2012,6 @@ void MainWindow::updateStatisticsTable(const QDate &filterDate)
         itemFaults->setTextAlignment(Qt::AlignCenter);
 
         // Color coding
-        itemTime->setForeground(QBrush(Qt::black)); // Black for time
         itemHits->setForeground(QBrush(QColor(0, 128, 0))); // Green
         itemFaults->setForeground(QBrush(QColor(200, 0, 0))); // Red
 
@@ -2105,8 +2135,6 @@ void MainWindow::onProblemSelectChanged(int index)
         itemTime->setTextAlignment(Qt::AlignCenter);
         itemResult->setTextAlignment(Qt::AlignCenter);
         
-        itemTime->setForeground(QBrush(Qt::black)); // Black for time
-
         if (att.correct) {
             itemResult->setForeground(QBrush(QColor(0, 128, 0)));
             itemResult->setFont(QFont("Segoe UI", 10, QFont::Bold));
@@ -2124,4 +2152,37 @@ void MainWindow::onProblemSelectChanged(int index)
     
     ui->lblTotalAciertos->setText(QString::number(totalHits));
     ui->lblTotalFallos->setText(QString::number(totalFaults));
+}
+
+// ==========================================================
+//     GESTIÓN DE PANELES LATERALES (Toggles)
+// ==========================================================
+
+void MainWindow::onSplitterMoved(int pos, int index)
+{
+    Q_UNUSED(pos);
+    Q_UNUSED(index);
+    updateToggleButtons();
+}
+
+void MainWindow::updateToggleButtons()
+{
+    QList<int> s = ui->splitter->sizes();
+    // Si el panel izquierdo está colapsado (o casi)
+    btnExpandLeft->setVisible(s[0] <= 10);
+    // Si el panel derecho está colapsado (o casi)
+    btnExpandRight->setVisible(s[2] <= 10);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    
+    // Posicionar los botones de flecha en el centro vertical de los bordes
+    int btnH = 80;
+    int btnW = 24;
+    int centerY = ui->centralwidget->height() / 2 - btnH / 2;
+    
+    btnExpandLeft->setGeometry(0, centerY, btnW, btnH);
+    btnExpandRight->setGeometry(ui->centralwidget->width() - btnW, centerY, btnW, btnH);
 }

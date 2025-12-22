@@ -30,13 +30,6 @@ login::login(QWidget *parent)
 
 
     setWindowTitle("Carta Náutica - Iniciar Sesión");
-
-    // --- ESTILO VISUAL MEJORADO (QSS - APPLE STYLE DARK) ---
-    QFile file(":/resources/login.qss");
-    if (file.open(QFile::ReadOnly)) {
-        QString qss = QLatin1String(file.readAll());
-        this->setStyleSheet(qss);
-    }
 }
 
 login::~login()
