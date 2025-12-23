@@ -69,7 +69,7 @@ private slots:
     void onDateFilterChanged(const QDate &date);
     void onStatsModeChanged(int index);
     void onProblemSelectChanged(int index);
-    void onSplitterMoved(int pos, int index);
+    void updateLayout();
 
     // Herramientas
     void onTexto();
@@ -116,9 +116,12 @@ private:
     QGraphicsView *view;
     QPixmap cartaPixmap;
 
+    bool leftExpanded = true;
+    int leftWidth = 250;
+    bool m_resizingLeft = false;
+
     // Side panel toggles
     QToolButton *btnExpandLeft;
-    QToolButton *btnExpandRight;
 
     // Session / user
     User m_loggedUser;
