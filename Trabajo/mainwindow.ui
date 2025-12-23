@@ -232,7 +232,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Estadísticas</string>
+                  <string>Historial</string>
                  </property>
                 </widget>
                </item>
@@ -675,7 +675,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Estadísticas de Usuario</string>
+                 <string>Historial de Usuario</string>
                 </property>
                </widget>
               </item>

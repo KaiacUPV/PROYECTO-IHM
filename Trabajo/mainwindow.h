@@ -108,6 +108,7 @@ private:
     QVector<ProblemAttempt> loadProblemAttempts(const QString &username, int problemIndex);
 
     void applyZoom(double factor); // added declaration
+    void updateToolsScale();
     QPixmap makeRoundedPixmap(const QPixmap &src, int diameter);
     void setCircularLabel(QLabel *label, const QPixmap &pixmap, int diameter);
 

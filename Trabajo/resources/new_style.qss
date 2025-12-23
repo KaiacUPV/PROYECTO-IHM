@@ -123,20 +123,74 @@ QPushButton:pressed, QToolButton:pressed {
     color: #ffffff;
     border: none;
     font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 20px;
 }
 
 #btnguardar:hover, #btnCorregir:hover, .loginButton:hover {
     background-color: #1d4ed8;
 }
 
-/* Danger/Logout Buttons */
-#btnlogout {
+/* Navigation & Problems (Blue Theme) */
+#btnProblemas, #btnAleatorio {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px; /* More rounded for navigation */
+}
+
+#btnProblemas:hover, #btnAleatorio:hover {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+}
+
+/* History (Indigo Theme) */
+#btnEstadistica {
+    background-color: #f5f3ff;
+    color: #4f46e5;
+    border: 1px solid #ddd6fe;
+    border-radius: 12px;
+}
+
+#btnEstadistica:hover {
+    background-color: #ede9fe;
+    border-color: #6366f1;
+}
+
+/* Help (Amber Theme) */
+#btnAyuda {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fef3c7;
+    border-radius: 20px; /* Circular-like for help */
+}
+
+#btnAyuda:hover {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+}
+
+/* Success/Login Buttons */
+#btnlogin {
+    background-color: #10b981;
+    color: #ffffff;
+    border: 1px solid #059669;
+    border-radius: 8px;
+}
+
+#btnlogin:hover {
+    background-color: #059669;
+}
+
+/* Danger/Logout/Clear Buttons */
+#btnlogout, #btnLimpiar {
     background-color: #fee2e2;
     color: #dc2626;
     border: 1px solid #fecaca;
+    border-radius: 8px;
 }
 
-#btnlogout:hover {
+#btnlogout:hover, #btnLimpiar:hover {
     background-color: #fecaca;
 }
 
@@ -236,12 +290,30 @@ QToolButton[checkable="true"] {
     margin: 2px;
     min-width: 64px;
     min-height: 64px;
+    border-radius: 12px;
 }
 
 QToolButton[checkable="true"]:checked {
     background-color: #eff6ff;
     border: 2px solid #3b82f6;
     color: #1d4ed8;
+}
+
+/* Specific Tool Groups (Gestalt: Similarity by Shape/Color) */
+/* Drawing Tools */
+#btnPunto, #btnLinea, #btnArco, #btnTexto, #btnColor {
+    border-radius: 8px;
+}
+
+/* Measurement Tools */
+#btnRegla, #btnCompas, #btnTransportador {
+    border-radius: 32px; /* Circular for instruments */
+    background-color: #f8fafc;
+}
+
+/* View/Action Tools */
+#btnZoomIn, #btnZoomOut, #btnMover, #btnBorrar {
+    border-radius: 4px; /* Square for utility */
 }
 
 /* ~~~ GroupBoxes (Gestalt: Closure & Proximity) ~~~ */
@@ -305,7 +377,7 @@ QScrollBar::handle:vertical:hover {
     color: white;
     border: 1px solid #1d4ed8;
     font-weight: bold;
-    font-size: 10pt;
+    font-size: 9pt;
     padding: 0px;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;

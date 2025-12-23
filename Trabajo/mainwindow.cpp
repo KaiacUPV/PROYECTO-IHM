@@ -1433,7 +1433,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             if (m_resizingLeft) {
                 // Usamos la posición global para evitar saltos al redimensionar
                 int newWidth = ui->centralwidget->mapFromGlobal(me->globalPosition().toPoint()).x();
-                if (newWidth > 180 && newWidth < 600) {
+                
+                // Limitamos el ancho entre el mínimo (180) y el máximo del widget (500)
+                int maxW = ui->leftwidget->maximumWidth();
+                if (newWidth < 180) newWidth = 180;
+                if (newWidth > maxW) newWidth = maxW;
+
+                if (leftWidth != newWidth) {
                     leftWidth = newWidth;
                     updateLayout();
                 }
@@ -1929,7 +1935,7 @@ void MainWindow::onAnswerSelected()
 void MainWindow::onEstadistica()
 {
     if (!m_isLogged) {
-        QMessageBox::information(this, "Información", "Debes iniciar sesión para ver tus estadísticas.");
+        QMessageBox::information(this, "Información", "Debes iniciar sesión para ver tu historial.");
         return;
     }
 
@@ -2196,11 +2202,11 @@ void MainWindow::updateLayout()
         ui->leftwidget->setGeometry(0, leftY, leftWidth, leftH);
         ui->leftwidget->show();
         btnExpandLeft->setText("◀");
-        btnExpandLeft->setGeometry(leftWidth, leftY + leftH/2 - 40, 24, 80);
+        btnExpandLeft->setGeometry(leftWidth, leftY + leftH/2 - 30, 20, 60);
     } else {
         ui->leftwidget->hide();
         btnExpandLeft->setText("▶");
-        btnExpandLeft->setGeometry(0, leftY + leftH/2 - 40, 24, 80);
+        btnExpandLeft->setGeometry(0, leftY + leftH/2 - 30, 20, 60);
     }
 
     btnExpandLeft->setVisible(true);
