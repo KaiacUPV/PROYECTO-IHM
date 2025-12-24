@@ -24,7 +24,7 @@ HelpDialog::HelpDialog(QWidget *parent) :
         "<li><b>Herramientas de dibujo:</b> Puedes añadir puntos, líneas y texto en el mapa para marcar posiciones o trazar rumbos.</li>"
         "<li><b>Herramientas de medición:</b> Usa el compás, la regla y el transportador de ángulos para realizar mediciones precisas sobre el mapa.</li>"
         "<li><b>Gestión de problemas:</b> Accede a la sección de problemas para resolver ejercicios prácticos de navegación.</li>"
-        "<li><b>Perfil de usuario:</b> Gestiona tu información de perfil y consulta tus estadísticas.</li>"
+        "<li><b>Perfil de usuario:</b> Gestiona tu información de perfil y consulta tu historial.</li>"
         "</ul>"
     );
 
@@ -38,8 +38,9 @@ HelpDialog::HelpDialog(QWidget *parent) :
         "<li><b>Añadir Punto:</b> Selecciona la herramienta 'Punto' y haz clic en el mapa.</li>"
         "<li><b>Trazar Línea:</b> Selecciona la herramienta 'Línea', haz clic en el punto de inicio y luego en el punto final.</li>"
         "<li><b>Compás:</b> Selecciona la herramienta, haz clic para fijar el centro y arrastra para definir el radio.</li>"
-        "<li><b>Regla:</b> Selecciónala y haz clic en dos puntos para medir la distancia.</li>"
+        "<li><b>Regla:</b> Selecciónala para ayudarte a trazar líneas rectas sobre la carta.</li>"
         "<li><b>Transportador:</b> Selecciónalo y úsalo para medir ángulos sobre el mapa.</li>"
+        "<li><b>Rotación:</b> Tanto la regla como el transportador pueden rotarse sobre cualquier punto manteniendo pulsada la tecla <b>Shift</b> y usando la <b>rueda del ratón</b>.</li>"
         "</ul>"
     );
 }

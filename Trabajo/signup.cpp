@@ -75,9 +75,6 @@ signup::signup(QWidget *parent)
     ui->btnShowPass1->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
     ui->btnShowPass2->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
 
-    ui->btnShowPass1->setAutoRaise(true);
-    ui->btnShowPass2->setAutoRaise(true);
-
     setWindowTitle("Carta Náutica - Registrarse");
 }
 

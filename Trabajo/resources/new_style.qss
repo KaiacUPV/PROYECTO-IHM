@@ -11,7 +11,7 @@ QMainWindow, QDialog, QMessageBox, QInputDialog, QFileDialog, #login, #signup, #
 }
 
 /* Ensure all pages and main containers have the correct background */
-#page, #page_usuario, #page_problem, #page_estadistica, #centralwidget, #rightwidget, #leftwidget, #mapwidget,
+#page, #page_usuario, #page_problem, #page_estadistica, #centralwidget, #leftwidget, #mapwidget,
 QTabWidget::pane, QTextBrowser, QTableWidget, QHeaderView::section, QAbstractScrollArea {
     background-color: #f0f2f5;
     color: #1a1a1a;
@@ -22,15 +22,40 @@ QRadioButton, QCheckBox {
     background: transparent;
 }
 
-/* ~~~ Sidebars ~~~ */
-#rightwidget {
-    background-color: #ffffff;
-    border-left: 1px solid #e0e0e0;
+/* ~~~ Top Bar (Fixed) ~~~ */
+#topBar {
+    background-color: rgba(255, 255, 255, 0.98);
+    border-bottom: 1px solid #d1d5db;
 }
 
+#topBar QToolButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px;
+    min-width: 34px;
+    min-height: 34px;
+}
+
+#topBar QToolButton:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+#topBar QToolButton:checked {
+    background-color: #e0e7ff;
+    border-color: #3b82f6;
+    color: #2563eb;
+}
+
+/* ~~~ Sidebars (Overlay Style) ~~~ */
 #leftwidget {
-    background-color: #ffffff;
-    border-right: 1px solid #e0e0e0;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-right: 2px solid #d1d5db;
+}
+
+#leftwidget:hover {
+    border-right: 2px solid #3b82f6;
 }
 
 /* ~~~ Text & Labels ~~~ */
@@ -60,6 +85,17 @@ QLineEdit:focus, QComboBox:focus {
     outline: none;
 }
 
+/* Specific fix for password toggle button */
+#btnShowPassword, #btnShowPass1, #btnShowPass2 {
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    padding: 2px;
+    border: none;
+    background: transparent;
+}
+
 /* ~~~ Buttons ~~~ */
 QPushButton, QToolButton {
     background-color: #ffffff;
@@ -87,20 +123,74 @@ QPushButton:pressed, QToolButton:pressed {
     color: #ffffff;
     border: none;
     font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 20px;
 }
 
 #btnguardar:hover, #btnCorregir:hover, .loginButton:hover {
     background-color: #1d4ed8;
 }
 
-/* Danger/Logout Buttons */
-#btnlogout {
+/* Navigation & Problems (Blue Theme) */
+#btnProblemas, #btnAleatorio {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px; /* More rounded for navigation */
+}
+
+#btnProblemas:hover, #btnAleatorio:hover {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+}
+
+/* History (Indigo Theme) */
+#btnEstadistica {
+    background-color: #f5f3ff;
+    color: #4f46e5;
+    border: 1px solid #ddd6fe;
+    border-radius: 12px;
+}
+
+#btnEstadistica:hover {
+    background-color: #ede9fe;
+    border-color: #6366f1;
+}
+
+/* Help (Amber Theme) */
+#btnAyuda {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fef3c7;
+    border-radius: 20px; /* Circular-like for help */
+}
+
+#btnAyuda:hover {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+}
+
+/* Success/Login Buttons */
+#btnlogin {
+    background-color: #10b981;
+    color: #ffffff;
+    border: 1px solid #059669;
+    border-radius: 8px;
+}
+
+#btnlogin:hover {
+    background-color: #059669;
+}
+
+/* Danger/Logout/Clear Buttons */
+#btnlogout, #btnLimpiar {
     background-color: #fee2e2;
     color: #dc2626;
     border: 1px solid #fecaca;
+    border-radius: 8px;
 }
 
-#btnlogout:hover {
+#btnlogout:hover, #btnLimpiar:hover {
     background-color: #fecaca;
 }
 
@@ -200,12 +290,30 @@ QToolButton[checkable="true"] {
     margin: 2px;
     min-width: 64px;
     min-height: 64px;
+    border-radius: 12px;
 }
 
 QToolButton[checkable="true"]:checked {
     background-color: #eff6ff;
     border: 2px solid #3b82f6;
     color: #1d4ed8;
+}
+
+/* Specific Tool Groups (Gestalt: Similarity by Shape/Color) */
+/* Drawing Tools */
+#btnPunto, #btnLinea, #btnArco, #btnTexto, #btnColor {
+    border-radius: 8px;
+}
+
+/* Measurement Tools */
+#btnRegla, #btnCompas, #btnTransportador {
+    border-radius: 32px; /* Circular for instruments */
+    background-color: #f8fafc;
+}
+
+/* View/Action Tools */
+#btnZoomIn, #btnZoomOut, #btnMover, #btnBorrar {
+    border-radius: 4px; /* Square for utility */
 }
 
 /* ~~~ GroupBoxes (Gestalt: Closure & Proximity) ~~~ */
@@ -226,14 +334,6 @@ QGroupBox::title {
     font-size: 9pt;
     font-weight: 600;
     text-transform: uppercase;
-}
-
-/* Specific Tool Groups */
-#widgetLetras, #widgetItems, #widgetItems_2 {
-    border: none;
-    background-color: #f8fafc;
-    border-radius: 8px;
-    margin: 4px;
 }
 
 /* ~~~ ScrollBars ~~~ */
@@ -272,36 +372,29 @@ QScrollBar::handle:vertical:hover {
 }
 
 /* ~~~ Side Panel Expand Buttons (Arrows) ~~~ */
-#btnExpandLeft, #btnExpandRight {
+#btnExpandLeft {
     background-color: #2563eb;
     color: white;
-    border: none;
+    border: 1px solid #1d4ed8;
     font-weight: bold;
-    font-size: 12pt;
+    font-size: 9pt;
     padding: 0px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-left: none;
 }
 
-#btnExpandLeft {
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
-
-#btnExpandRight {
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
-}
-
-#btnExpandLeft:hover, #btnExpandRight:hover {
+#btnExpandLeft:hover {
     background-color: #1d4ed8;
 }
 
 /* ~~~ Splitter Handles ~~~ */
 QSplitter::handle {
-    background-color: #e2e8f0;
+    background-color: #cbd5e1;
 }
 
 QSplitter::handle:horizontal {
-    width: 2px;
+    width: 6px;
 }
 
 QSplitter::handle:hover {

@@ -37,57 +37,47 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , scene(new QGraphicsScene(this))
+    , m_resizingLeft(false)
 {
     ui->setupUi(this);
 
-    // Configurar el splitter principal (Izquierda: Navegación, Centro: Mapa, Derecha: Herramientas)
-    ui->splitter->setStretchFactor(0, 0); // Navegación (fijo)
-    ui->splitter->setStretchFactor(1, 1); // Mapa (expandible)
-    ui->splitter->setStretchFactor(2, 0); // Herramientas (fijo)
-    ui->splitter->setSizes({250, 650, 100});
+    // --- CONFIGURACIÓN DE PANELES FLOTANTES (OVERLAY) ---
+    // Sacamos los widgets del splitter para que floten sobre el mapa
+    ui->leftwidget->setParent(ui->centralwidget);
+    ui->topBar->setParent(ui->centralwidget);
+    ui->mapwidget->setParent(ui->centralwidget);
+    
+    // Asegurar que el mapa esté al fondo y los paneles encima
+    ui->mapwidget->lower();
+    ui->leftwidget->raise();
+    ui->topBar->raise();
 
-    // Botones de expansión (flechas) que aparecen cuando se cierran los paneles
+    // Ocultar el splitter original ya que no lo usaremos
+    ui->splitter->hide();
+
+    // Panel Izquierdo (Overlay)
+    ui->leftwidget->setMouseTracking(true);
+    ui->leftwidget->installEventFilter(this);
+
+    // Botones de expansión (flechas)
     btnExpandLeft = new QToolButton(ui->centralwidget);
     btnExpandLeft->setObjectName("btnExpandLeft");
     btnExpandLeft->setText("▶");
     btnExpandLeft->setCursor(Qt::PointingHandCursor);
-    btnExpandLeft->setVisible(false);
-
-    btnExpandRight = new QToolButton(ui->centralwidget);
-    btnExpandRight->setObjectName("btnExpandRight");
-    btnExpandRight->setText("◀");
-    btnExpandRight->setCursor(Qt::PointingHandCursor);
-    btnExpandRight->setVisible(false);
+    btnExpandLeft->raise();
 
     connect(btnExpandLeft, &QToolButton::clicked, this, [this](){
-        QList<int> s = ui->splitter->sizes();
-        s[0] = 250;
-        if (s[1] > 250) s[1] -= 250;
-        ui->splitter->setSizes(s);
-        updateToggleButtons();
+        leftExpanded = !leftExpanded;
+        updateLayout();
     });
-    connect(btnExpandRight, &QToolButton::clicked, this, [this](){
-        QList<int> s = ui->splitter->sizes();
-        s[2] = 150;
-        if (s[1] > 150) s[1] -= 150;
-        ui->splitter->setSizes(s);
-        updateToggleButtons();
-    });
-
-    connect(ui->splitter, &QSplitter::splitterMoved, this, &MainWindow::onSplitterMoved);
 
     // Centrar botones en los GroupBox de herramientas
-    if (ui->widgetLetras->layout()) ui->widgetLetras->layout()->setAlignment(Qt::AlignHCenter);
-    if (ui->widgetItems->layout()) ui->widgetItems->layout()->setAlignment(Qt::AlignHCenter);
-    if (ui->widgetItems_2->layout()) ui->widgetItems_2->layout()->setAlignment(Qt::AlignHCenter);
+    // (Ya no son necesarios los alineamientos de los GroupBox antiguos)
 
     // --- MEJORAS VISUALES (Gestalt: Closure & Proximity) ---
     ui->groupUsuario->setTitle("SESIÓN");
     ui->groupProblems->setTitle("NAVEGACIÓN");
-    ui->groupTools->setTitle("HERRAMIENTAS");
-    ui->widgetLetras->setTitle("Dibujo");
-    ui->widgetItems_2->setTitle("Instrumentos");
-    ui->widgetItems->setTitle("Vista");
+    // ui->groupTools->setTitle("HERRAMIENTAS"); // Eliminado o movido a topBar
 
     // Tooltips para mejor UX
     ui->btnTexto->setToolTip("Añadir texto a la carta");
@@ -107,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
     //   ASIGNAR ICONOS PNG
     // =========================
 
-    QSize iconSize(52, 52);
+    QSize iconSize(28, 28);
 
     // --- Herramientas ---
     ui->btnTexto->setIcon(QIcon(":/icon/resources/icons/texto.png"));
@@ -217,6 +207,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->line_contra->setEchoMode(QLineEdit::Password);
     ui->btnShowPassword->setCheckable(true);
     ui->btnShowPassword->setIcon(QIcon(":icon/resources/icons/eye-closed.svg"));
+    ui->btnShowPassword->setIconSize(QSize(20, 20));
 
     // Logout button (page_usuario)
     connect(ui->btnlogout, &QToolButton::clicked, this, &MainWindow::onLogout);
@@ -319,11 +310,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Theme toggle shortcut
     // QShortcut *themeShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
     // connect(themeShortcut, &QShortcut::activated, this, &MainWindow::toggleTheme);
-
-    // Ajustar tamaño inicial del splitter para que el panel lateral no sea demasiado ancho
-    QList<int> sizes;
-    sizes << 200 << 700 << 100;
-    ui->splitter->setSizes(sizes);
 
     applyKeyBindings();
 }
@@ -872,10 +858,8 @@ void MainWindow::onPerfil()
     ui->stackedWidget->setCurrentWidget(ui->page_usuario);
     loadProfileUI();
 
-    QList<int> sizes;
-    sizes << 300 << 600 << 100;
-    ui->splitter->setSizes(sizes);
-    updateToggleButtons();
+    leftExpanded = true;
+    updateLayout();
 }
 
 void MainWindow::updateUserAvatar()
@@ -944,9 +928,8 @@ void MainWindow::onLoginSuccess(const User &u)
 
     ui->stackedWidget->setCurrentWidget(ui->page_nav);
 
-    QList<int> sizes;
-    sizes << 200 << 700 << 100;
-    ui->splitter->setSizes(sizes);
+    leftExpanded = true;
+    updateLayout();
 
     // Actualizar visibilidad de botones
     ui->btnlogin->setVisible(false);
@@ -1006,7 +989,9 @@ void MainWindow::onLogout()
 
     // Volver a la página inicial
     ui->stackedWidget->setCurrentWidget(ui->page_nav);
-    QList<int> sizes; sizes << 200 << 700 << 100; ui->splitter->setSizes(sizes);
+    
+    leftExpanded = true;
+    updateLayout();
 
     //QMessageBox::information(this, "Sesión cerrada", "Sesión cerrada y cambios guardados.");
 }
@@ -1032,9 +1017,8 @@ void MainWindow::back()
 
     ui->stackedWidget->setCurrentWidget(ui->page_nav);
 
-    QList<int> sizes;
-    sizes << 200 << 700 << 100;
-    ui->splitter->setSizes(sizes);
+    leftExpanded = true;
+    updateLayout();
 }
 
 void MainWindow::onProblemas()
@@ -1059,10 +1043,8 @@ void MainWindow::onProblemas()
 
     ui->stackedWidget->setCurrentWidget(ui->page_problem);
 
-    QList<int> sizes;
-    sizes << 350 << 550 << 100;
-    ui->splitter->setSizes(sizes);
-    updateToggleButtons();
+    leftExpanded = true;
+    updateLayout();
 }
 
 // ==========================================================
@@ -1443,6 +1425,49 @@ void MainWindow::toggleTheme()
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    // --- Redimensionar Panel Izquierdo (Slider) ---
+    if (obj == ui->leftwidget) {
+        if (event->type() == QEvent::MouseMove) {
+            QMouseEvent *me = static_cast<QMouseEvent*>(event);
+            int margin = 10;
+            if (m_resizingLeft) {
+                // Usamos la posición global para evitar saltos al redimensionar
+                int newWidth = ui->centralwidget->mapFromGlobal(me->globalPosition().toPoint()).x();
+                
+                // Limitamos el ancho entre el mínimo (180) y el máximo del widget (500)
+                int maxW = ui->leftwidget->maximumWidth();
+                if (newWidth < 180) newWidth = 180;
+                if (newWidth > maxW) newWidth = maxW;
+
+                if (leftWidth != newWidth) {
+                    leftWidth = newWidth;
+                    updateLayout();
+                }
+                return true;
+            } else {
+                if (me->pos().x() > ui->leftwidget->width() - margin) {
+                    ui->leftwidget->setCursor(Qt::SizeHorCursor);
+                } else {
+                    ui->leftwidget->setCursor(Qt::ArrowCursor);
+                }
+            }
+        } else if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *me = static_cast<QMouseEvent*>(event);
+            int margin = 10;
+            if (me->button() == Qt::LeftButton && me->pos().x() > ui->leftwidget->width() - margin) {
+                m_resizingLeft = true;
+                ui->leftwidget->grabMouse();
+                return true;
+            }
+        } else if (event->type() == QEvent::MouseButtonRelease) {
+            if (m_resizingLeft) {
+                m_resizingLeft = false;
+                ui->leftwidget->releaseMouse();
+                return true;
+            }
+        }
+    }
+
     if (!scene || !view || obj != view->viewport())
         return QMainWindow::eventFilter(obj, event);
     {
@@ -1910,16 +1935,14 @@ void MainWindow::onAnswerSelected()
 void MainWindow::onEstadistica()
 {
     if (!m_isLogged) {
-        QMessageBox::information(this, "Información", "Debes iniciar sesión para ver tus estadísticas.");
+        QMessageBox::information(this, "Información", "Debes iniciar sesión para ver tu historial.");
         return;
     }
 
     ui->stackedWidget->setCurrentWidget(ui->page_estadistica);
 
-    QList<int> sizes;
-    sizes << 400 << 500 << 100;
-    ui->splitter->setSizes(sizes);
-    updateToggleButtons();
+    leftExpanded = true;
+    updateLayout();
 
     // --- Mejoras visuales para la tabla ---
     ui->tableStats->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -2158,31 +2181,44 @@ void MainWindow::onProblemSelectChanged(int index)
 //     GESTIÓN DE PANELES LATERALES (Toggles)
 // ==========================================================
 
-void MainWindow::onSplitterMoved(int pos, int index)
+void MainWindow::updateLayout()
 {
-    Q_UNUSED(pos);
-    Q_UNUSED(index);
-    updateToggleButtons();
+    int w = ui->centralwidget->width();
+    int h = ui->centralwidget->height();
+    int topH = 50;
+
+    // El mapa siempre ocupa todo el fondo
+    ui->mapwidget->setGeometry(0, 0, w, h);
+
+    // Barra Superior (Fija)
+    ui->topBar->setGeometry(0, 0, w, topH);
+    ui->topBar->show();
+
+    // Panel Izquierdo (Overlay)
+    int leftY = topH;
+    int leftH = h - topH;
+
+    if (leftExpanded) {
+        ui->leftwidget->setGeometry(0, leftY, leftWidth, leftH);
+        ui->leftwidget->show();
+        btnExpandLeft->setText("◀");
+        btnExpandLeft->setGeometry(leftWidth, leftY + leftH/2 - 30, 20, 60);
+    } else {
+        ui->leftwidget->hide();
+        btnExpandLeft->setText("▶");
+        btnExpandLeft->setGeometry(0, leftY + leftH/2 - 30, 20, 60);
+    }
+
+    btnExpandLeft->setVisible(true);
 }
 
 void MainWindow::updateToggleButtons()
 {
-    QList<int> s = ui->splitter->sizes();
-    // Si el panel izquierdo está colapsado (o casi)
-    btnExpandLeft->setVisible(s[0] <= 10);
-    // Si el panel derecho está colapsado (o casi)
-    btnExpandRight->setVisible(s[2] <= 10);
+    // Ya no es necesario con el nuevo sistema de layout manual
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    
-    // Posicionar los botones de flecha en el centro vertical de los bordes
-    int btnH = 80;
-    int btnW = 24;
-    int centerY = ui->centralwidget->height() / 2 - btnH / 2;
-    
-    btnExpandLeft->setGeometry(0, centerY, btnW, btnH);
-    btnExpandRight->setGeometry(ui->centralwidget->width() - btnW, centerY, btnW, btnH);
+    updateLayout();
 }

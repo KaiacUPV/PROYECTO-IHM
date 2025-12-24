@@ -69,7 +69,7 @@ private slots:
     void onDateFilterChanged(const QDate &date);
     void onStatsModeChanged(int index);
     void onProblemSelectChanged(int index);
-    void onSplitterMoved(int pos, int index);
+    void updateLayout();
 
     // Herramientas
     void onTexto();
@@ -108,6 +108,7 @@ private:
     QVector<ProblemAttempt> loadProblemAttempts(const QString &username, int problemIndex);
 
     void applyZoom(double factor); // added declaration
+    void updateToolsScale();
     QPixmap makeRoundedPixmap(const QPixmap &src, int diameter);
     void setCircularLabel(QLabel *label, const QPixmap &pixmap, int diameter);
 
@@ -116,9 +117,12 @@ private:
     QGraphicsView *view;
     QPixmap cartaPixmap;
 
+    bool leftExpanded = true;
+    int leftWidth = 250;
+    bool m_resizingLeft = false;
+
     // Side panel toggles
     QToolButton *btnExpandLeft;
-    QToolButton *btnExpandRight;
 
     // Session / user
     User m_loggedUser;
