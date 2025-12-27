@@ -58,6 +58,13 @@ signup::signup(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Cargar estilo específico para Signup
+    QFile file(":/resources/signup.qss");
+    if (file.open(QFile::ReadOnly)) {
+        QString styleSheet = QLatin1String(file.readAll());
+        this->setStyleSheet(styleSheet);
+    }
+
     connect(ui->Accept_Button, &QPushButton::clicked, this, &signup::onAccept);
     connect(ui->Btn_Avatar, &QPushButton::clicked, this, &signup::on_btn_avatar_clicked);
 

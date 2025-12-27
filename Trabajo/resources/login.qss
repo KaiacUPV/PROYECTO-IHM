@@ -1,74 +1,112 @@
+/* Microsoft Fluent Design Style for Login */
+
 QWidget {
-    background-color: #2B2B2B;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #FFFFFF;
+    font-family: "Segoe UI", "Segoe UI Variable", "Segoe", sans-serif;
     font-size: 14px;
-    color: #E0E0E0;
+    color: #1A1A1A;
 }
 
-/* Campos de texto */
-QLineEdit {
-    background-color: #252525; /* Apple Dark Gray */
-    border: 1px solid #3A3A3C;
-    border-radius: 10px;       /* Rounded corners */
-    padding: 10px 12px;
-    color: #FFFFFF;
-    selection-background-color: #0A84FF;
-}
-QLineEdit:focus {
-    border: 1px solid #0A84FF; /* Apple Blue Focus */
-    background-color: #3A3A3C;
+/* Labels */
+QLabel {
+    color: #1A1A1A;
+    font-weight: 400;
 }
 
-/* Botones principales */
-QPushButton {
-    background-color: #0A84FF; /* Apple Blue */
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 24px;
+QLabel#leEmail, QLabel#Password_Label {
+    font-size: 14px;
     font-weight: 600;
-    font-size: 15px;
-}
-QPushButton:hover {
-    background-color: #0077ED;
-}
-QPushButton:pressed {
-    background-color: #0062C3;
+    margin-bottom: 4px;
 }
 
-/* Botón Signup (enlace o secundario) */
-QToolButton#btnsingup {
-    background: transparent;
-    color: #0A84FF;
-    border: none;
-    font-weight: 500;
+QLabel#Repeat_Label {
+    color: #5E5E5E;
     font-size: 13px;
 }
+
+/* Input Fields */
+QLineEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #D1D1D1; /* Standard border */
+    border-bottom: 1px solid #8A8A8A; /* Darker bottom border */
+    border-radius: 4px;
+    padding: 6px 10px;
+    color: #1A1A1A;
+    selection-background-color: #0067C0;
+    selection-color: #FFFFFF;
+    min-height: 20px;
+}
+
+QLineEdit:hover {
+    background-color: #FDFDFD;
+    border-color: #BEBEBE;
+    border-bottom-color: #5E5E5E;
+}
+
+QLineEdit:focus {
+    border: 1px solid #D1D1D1;
+    border-bottom: 2px solid #0067C0; /* Accent color on bottom */
+    background-color: #FFFFFF;
+}
+
+/* Primary Button (Aceptar) */
+QPushButton#Accept_Button {
+    background-color: #0067C0; /* Windows Blue */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 24px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+QPushButton#Accept_Button:hover {
+    background-color: #005DA6;
+}
+
+QPushButton#Accept_Button:pressed {
+    background-color: #005293;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+QPushButton#Accept_Button:disabled {
+    background-color: #CECECE;
+    color: #FFFFFF;
+}
+
+/* Secondary Button (Registrarse) */
+QToolButton#btnsingup {
+    background-color: transparent;
+    color: #0067C0;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
 QToolButton#btnsingup:hover {
-    color: #409CFF;
-    text-decoration: underline;
+    background-color: #F3F3F3; /* Subtle hover background */
+    color: #005DA6;
 }
 
-/* Botón Mostrar Contraseña */
+QToolButton#btnsingup:pressed {
+    background-color: #E5E5E5;
+    color: #005293;
+}
+
+/* Password Toggle Button */
 QToolButton#btnShowPassword {
-    background-color: #2C2C2E;
-    border: 1px solid #3A3A3C;
-    border-radius: 10px;
-    min-width: 40px;
-    min-height: 35px;
-}
-QToolButton#btnShowPassword:hover {
-    background-color: #3A3A3C;
-    border: 1px solid #0A84FF;
-}
-QToolButton#btnShowPassword:checked {
-    background-color: #3A3A3C;
-    border: 1px solid #0A84FF;
-    background-color: rgba(10, 132, 255, 0.15);
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px;
 }
 
-/* Etiquetas */
-QLabel {
-    color: #E0E0E0;
-    font-weight: 400;
+QToolButton#btnShowPassword:hover {
+    background-color: #F0F0F0;
+}
+
+QToolButton#btnShowPassword:pressed {
+    background-color: #E0E0E0;
 }

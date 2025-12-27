@@ -19,6 +19,13 @@ login::login(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Cargar estilo específico para Login
+    QFile file(":/resources/login.qss");
+    if (file.open(QFile::ReadOnly)) {
+        QString styleSheet = QLatin1String(file.readAll());
+        this->setStyleSheet(styleSheet);
+    }
+
     connect(ui->Accept_Button, &QPushButton::clicked, this, &login::onAccept);
     connect(ui->btnsingup,     &QToolButton::clicked, this, &login::onSignup);
     connect(ui->btnShowPassword, &QToolButton::toggled,
